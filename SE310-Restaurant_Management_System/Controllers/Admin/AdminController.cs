@@ -13,6 +13,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
 
         public IActionResult Index()
         {
+            var test = 2;
             return View();
         }
 
