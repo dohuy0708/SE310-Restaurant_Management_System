@@ -1,7 +1,17 @@
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using SE310_Restaurant_Management_System.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
+
+var connectionString = builder.Configuration.GetConnectionString("QlnhaHangContext");
+
+builder.Services.AddDbContext<QlnhaHangContext>(x => x.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
