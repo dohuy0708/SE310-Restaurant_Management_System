@@ -1,0 +1,37 @@
+﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.BookingOrder>
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Đơn đặt bàn</h4>
+
+        <div class="table-responsive">
+            <table class="table table-primary">
+                <thead>
+                    <tr>
+                        <th> Khách hàng </th>
+                        <th> SĐT </th>
+                        <th> Thời gian </th>
+                        <th> Số người </th>
+                        <th> Tiền cọc </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < 8; i++)
+                    {
+                        <tr class="table-info">
+                            <td>Đỗ Huy </td>
+                            <td> 0987654321</td>
+                            <td>17:00 25/12/2024</td>
+                            <td>2</td>
+                            <td> 200000 đ</td>
+                            <td> <a>Gọi món</a> | <a>Hủy</a></td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>

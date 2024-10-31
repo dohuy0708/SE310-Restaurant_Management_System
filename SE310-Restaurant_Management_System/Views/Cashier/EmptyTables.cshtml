@@ -1,0 +1,17 @@
+﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.RestaurantTable>
+<div class="row">
+
+    @foreach( var item in Model)
+    {
+        <div class="col-md-3  grid-margin">
+            <div class="card bg-gradient-danger card-img-holder text-white">
+                @* <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"> *@
+                <h3 class="mx-2 mt-2 mb-0 ">@item.TableNumber - @item.Location</h3>
+                <div class="card-body m-0 ">
+                    <button type="button" class="btn btn-gradient-warning btn-fw m-2">Gọi món</button>
+                    <button type="button" class="btn btn-gradient-primary btn-fw m-2">Đặt bàn</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

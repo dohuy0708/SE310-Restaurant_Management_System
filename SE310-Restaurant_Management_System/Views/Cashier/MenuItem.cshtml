@@ -1,0 +1,17 @@
+﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.MenuItem>
+
+<div class="row">
+
+    @foreach(var item in Model)
+    {
+        <div class="col-md-3  grid-margin">
+            <div class="card bg-gradient-danger card-img-holder text-white">
+                <div class="card-body m-2 p-0">
+                    <img class="w-100" src="/assets/images/Logo.png" />
+                    <h5 class="card-text">@item.Name</h5>
+                    <h4 class="mb-1 text-danger">@item.Price</h4>
+                </div>
+            </div>
+        </div>
+    }
+</div>
