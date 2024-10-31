@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "QuanLyNhanVien";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using SE310_Restaurant_Management_System.Models;
+@using X.PagedList.Mvc.Core
+@model X.PagedList.IPagedList<User>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h1>QuanLyNhanVien</h1>
+
+<table class="table table-striped" style="position:relative">
+    <thead>
+        <tr>
+            <th> Username </th>
+            <th> Password </th>
+            <th> Vai trò </th>
+            <th> Email </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Username)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Password)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Role.RoleName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+            </tr>
+
+        }
+
+    </tbody>
+</table>
+
+<div class="page-list" style="position:fixed; top:660px; height:100px" >
+    @Html.PagedListPager(Model, page => Url.Action("QuanLyNhanVien", new { page = page }), new PagedListRenderOptions()
+{
+    LiElementClasses = new List<String> { "page-item" },
+    PageClasses = new List<String> { "page-link" }
+})
+</div>
+
