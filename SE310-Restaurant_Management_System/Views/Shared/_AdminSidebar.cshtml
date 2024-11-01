@@ -1,6 +1,7 @@
 ﻿<!-- _AdminSidebar.cshtml -->
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 <li class="nav-item">
-    <a class="nav-link" href="/Admin/Staff">
+    <a class="nav-link" asp-controller="Admin" asp-action="QuanLyNhanVien">
         <span class="menu-title">Quản lý nhân viên</span>
         <i class="mdi mdi-account-multiple menu-icon"></i>
     </a>
