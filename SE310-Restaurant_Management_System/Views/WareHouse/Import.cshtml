@@ -1,8 +1,55 @@
-﻿
+﻿@using X.PagedList.Mvc.Core
+@using SE310_Restaurant_Management_System.Models
+@model X.PagedList.IPagedList<InventoryEntry>
 @{
     ViewData["Title"] = "Import";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Import</h1>
 
+ 
+    <h4 class="card-title">ĐƠN NHẬP KHO</h4>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+
+        <!-- Search form on the left -->
+        <form class="d-flex align-items-center h-100" action="#">
+            <div class="input-group">
+                <div class="input-group-prepend bg-transparent">
+                    <i class="input-group-text border-0 mdi mdi-magnify"></i>
+                </div>
+                <!-- Input with border and custom width -->
+                <input type="text" class="form-control border rounded" style="width: 400px;" placeholder="Tìm kiếm">
+            </div>
+        </form>
+        <div>
+            <button type="button" class="btn btn-primary btn-md">Nhập Kho</button>
+           
+        </div>
+    </div>
+<table class="table table-hover table-striped" style="position:relative">
+        <thead>
+            <tr>
+                <th>Mã Đơn</th>
+                <th>Ngày Nhập</th>
+                <th>Mô tả</th>
+                <th>Tổng Tiền</th>
+            </tr>
+        </thead>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EntryId</td>
+                <td>@item.EntryDate</td>
+                <td>@item.Description </td>
+                <td>@item.TotalPrice</td>
+                 
+            </tr>
+        }
+    </table>
+<div style="position:fixed; top:600px">
+    @Html.PagedListPager(Model, page => Url.Action("Import", new { page = page }), new PagedListRenderOptions()
+{
+    LiElementClasses = new List<String> { "page-item" },
+    PageClasses = new List<String> { "page-link" }
+})
+</div>

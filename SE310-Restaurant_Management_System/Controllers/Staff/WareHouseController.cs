@@ -1,11 +1,18 @@
+using Azure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using SE310_Restaurant_Management_System.Models;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
+using X.PagedList;
 
 namespace SE310_Restaurant_Management_System.Controllers.Staff
 {
+    [Route("WareHouse")]
     public class WareHouseController : Controller
     {
         QlnhaHangContext db = new QlnhaHangContext();
@@ -16,33 +23,54 @@ namespace SE310_Restaurant_Management_System.Controllers.Staff
             _logger = logger;
         }
 
-        public IActionResult Home()
+        [Route("Home")]
+        public IActionResult Home(int ? page)
         {
-            return View();
+            int pageSize = 8;
+            int pageNumber = page == null || page < 0 ? 1 : page.Value;
+            var ingredients = db.Ingredients
+                      .Include(i => i.Type) // Join voi bang IngredientTypes
+                      .ToList();
+            PagedList<Ingredient> list = new PagedList<Ingredient>(ingredients, pageNumber, pageSize);
+
+            return View(list);
         }
 
+
+
+        [Route("Import")]
         [HttpGet]
-        public IActionResult Import()
+        public IActionResult Import( int ? page )
         {
-            return View();
-        }
-        [HttpPost]
-        public IActionResult Import(InventoryExit inventoryExit)
-        {
-            return View(inventoryExit);
+            int pageSize = 8;
+            int pageNumber = page ==null || page < 0 ? 1 : page.Value;
+
+            var imports = db.InventoryEntries.ToList();
+
+            PagedList<InventoryEntry> list = new PagedList<InventoryEntry>(imports, pageNumber, pageSize);
+
+
+            return View(list);
         }
 
+
+      
+        [Route("Export")]
         [HttpGet]
-        public IActionResult Export()
+        public IActionResult Export(int? page)
         {
-            return View();
-        }
+            int pageSize = 8;
+            int pageNumber = page ==null || page < 0 ? 1 : page.Value;
 
-        [HttpPost]
-        public IActionResult Export(InventoryExit inventoryExit)
-        {
-            return View(inventoryExit);
+            var exports = db.InventoryExits.ToList();
+
+            PagedList<InventoryExit> list = new PagedList<InventoryExit>(exports, pageNumber, pageSize);
+
+
+            return View(list);
+           
         }
+ 
 
 
 

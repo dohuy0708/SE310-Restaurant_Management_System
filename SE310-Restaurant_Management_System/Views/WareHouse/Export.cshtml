@@ -1,8 +1,58 @@
-﻿
+﻿@using X.PagedList.Mvc.Core
+@using SE310_Restaurant_Management_System.Models
+@model X.PagedList.IPagedList<InventoryExit>
 @{
     ViewData["Title"] = "Export";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Export</h1>
 
+ 
+    <h4 class="card-title">ĐƠN XUẤT KHO</h4>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+
+        <!-- Search form on the left -->
+        <form class="d-flex align-items-center h-100" action="#">
+            <div class="input-group">
+                <div class="input-group-prepend bg-transparent">
+                    <i class="input-group-text border-0 mdi mdi-magnify"></i>
+                </div>
+                <!-- Input with border and custom width -->
+                <input type="text" class="form-control border rounded" style="width: 400px;" placeholder="Tìm kiếm">
+            </div>
+        </form>
+        <div>
+            
+            <button type="button" class="btn btn-outline-primary btn-md">Xuất Kho</button>
+        </div>
+    </div>
+<table class="table table-hover table-striped" style="position:relative">
+        <thead>
+            <tr>
+                <th>Mã Đơn</th>
+                <th>Ngày Nhập</th>
+                <th>Mô tả</th>
+                <th>Người Nhập </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ExitId</td>
+                    <td>@item.ExitDate</td>
+                    <td>@item.Description </td>
+                    <td>@item.RecipientName</td>
+
+                </tr>
+            }
+
+        </tbody>
+    </table>
+<div style="position:fixed; top:600px">
+    @Html.PagedListPager(Model, page => Url.Action("Export", new { page = page }), new PagedListRenderOptions()
+{
+    LiElementClasses = new List<String> { "page-item" },
+    PageClasses = new List<String> { "page-link" }
+})
+</div>

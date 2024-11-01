@@ -2271,7 +2271,7 @@
   --bs-black-rgb: 0, 0, 0;
   --bs-body-color-rgb: 52, 58, 64;
   --bs-body-bg-rgb: 255, 255, 255;
-  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto,
+  --bs-font-sans-serif:  "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas,
@@ -14598,7 +14598,7 @@ h6,
 .h4,
 .h5,
 .h6 {
-  font-family: "ubuntu-medium", sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 
 p {
@@ -14842,7 +14842,7 @@ code {
   background: #f2edf3;
   color: color(dark);
   border-top: 1px solid #e7dee9;
-  padding: 30px 1rem;
+  padding: 10px 1rem;
   transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;
   -webkit-transition: all 0.25s ease;
@@ -15834,7 +15834,7 @@ code {
 .btn {
   font-size: 0.875rem;
   line-height: 1;
-  font-family: "ubuntu-bold", sans-serif;
+  font-family: "Segoe UI", sans-serif;
   /* Buttons with only icons */
   /* Buttons with icon and text */
 }
