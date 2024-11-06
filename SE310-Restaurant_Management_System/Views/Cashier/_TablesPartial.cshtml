@@ -1,0 +1,23 @@
+﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.RestaurantTable>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-3 grid-margin">
+            <div class="card bg-gradient-info card-img-holder text-white">
+                <div class="d-flex justify-content-between">
+                    <h3 class="mx-2 mt-2 mb-0">Bàn @item.TableNumber</h3>
+                    <h4 class="mx-2 mt-2 mb-0">@item.Location</h4>
+                </div>
+                <div class="card-body m-0">
+                    <button type="button" class="btn btn-gradient-warning btn-fw m-2"
+                            data-bs-toggle="modal" data-bs-target="#menuModal"
+                            onclick="showMenuModal(); setTableInfo('@item.TableNumber', '@item.Location')">
+                        Gọi món
+                    </button>
+                    <button type="button" class="btn btn-gradient-success btn-fw m-2">Đặt bàn</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

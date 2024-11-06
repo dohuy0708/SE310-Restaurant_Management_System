@@ -3,34 +3,39 @@
 <div class="card">
     <div class="card-body">
         <h4 class="card-title">Đơn đặt bàn</h4>
-
+        <a asp-action="Booking">Đặt bàn</a>
         <div class="table-responsive">
             <table class="table table-danger">
                 <thead>
                     <tr>
-                        <th> Khách hàng </th>
-                        <th> SĐT </th>
-                        <th> Thời gian </th>
-                        <th> Số người </th>
-                        <th> Tiền cọc </th>
+                        <th>Khách hàng</th>
+                        <th>SĐT</th>
+                        <th>Thời gian</th>
+                        <th>Số người</th>
+                        <th>Tiền cọc</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @for (int i = 0; i < 8; i++)
+                    @foreach (var item in Model)
                     {
                         <tr class="table-warning">
-                            <td>Đỗ Huy </td>
-                            <td> 0987654321</td>
-                            <td>17:00 25/12/2024</td>
-                            <td>2</td>
-                            <td> 200000 đ</td>
-                            <td> <a>Gọi món</a> | <a>Hủy</a></td>
+                            <td>@item.CustomerName</td>
+                            <td>@item.CustomerPhone</td>
+                            <td>@item.BookingTime</td>
+                            <td>@item.NumberOfPeople</td>
+                            <td>@item.DepositAmount đ</td>
+                            <td>
+                                <!-- Form hủy đặt bàn -->
+                                <form asp-action="CancelBooking" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="bookingOrderId" value="@item.BookingOrderId" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Hủy</button>
+                                </form>
+                            </td>
                         </tr>
                     }
-
                 </tbody>
-
             </table>
         </div>
     </div>

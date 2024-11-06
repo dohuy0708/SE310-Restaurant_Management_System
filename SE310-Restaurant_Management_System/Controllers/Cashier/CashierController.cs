@@ -47,7 +47,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             return View(menuItems.ToList());
         }
 
-        public IActionResult Tables(int? status)
+        public IActionResult Tables()
         {
             // Lấy danh sách SubCategories từ cơ sở dữ liệu
             var subCategories = db.SubCategories.AsNoTracking().ToList();
@@ -60,13 +60,22 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             });
             ViewBag.SubCategories = subCategories;
 
-            var tables = db.RestaurantTables.AsNoTracking();
-            if(status!= null)
-            {
-                tables=tables.Where(t=>t.StatusId==status);
-            }
-            return View(tables.ToList());
+            // Lấy danh sách tất cả bàn (không lọc)
+            var tables = db.RestaurantTables.AsNoTracking().ToList();
+            return View(tables);
         }
+        public IActionResult FilterTablesByStatus(int? status)
+        {
+            var tables = db.RestaurantTables.AsNoTracking();
+
+            if (status != null)
+            {
+                tables = tables.Where(t => t.StatusId == status);
+            }
+
+            return PartialView("_TablesPartial", tables.ToList());
+        }
+
         public IActionResult GetMenuItems(int? id)
         {
             var menuItems = db.MenuItems.AsNoTracking();
@@ -82,9 +91,75 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             var orders = db.BookingOrders.AsNoTracking().ToList();
             return View(orders);
         }
+        [HttpGet]
+        public IActionResult Booking()
+        {
+            // Lấy danh sách bàn trống từ cơ sở dữ liệu
+            var tables = db.RestaurantTables.Where(p => p.StatusId == 2).ToList();
+
+            // Truyền danh sách bàn vào ViewBag để sử dụng trong View
+            ViewBag.Tables = tables;
+
+            return View();
+        }
+
+        // POST: /Booking
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Booking(BookingOrder bookingOrder)
+        {
+            if (ModelState.IsValid)
+            {
+                // Cập nhật trạng thái bàn thành đã được đặt (giả sử là StatusId = 1 cho bàn đã được đặt)
+                var table = db.RestaurantTables.FirstOrDefault(t => t.TableId == bookingOrder.TableId);
+                if (table != null)
+                {
+                    table.StatusId = 1; // Chuyển trạng thái bàn thành đã được đặt
+                    db.SaveChanges();
+                }
+
+                // Thêm đơn đặt bàn vào cơ sở dữ liệu
+                db.BookingOrders.Add(bookingOrder);
+                db.SaveChanges();
+
+                // Điều hướng về trang danh sách đặt bàn hoặc trang xác nhận
+                return RedirectToAction("BookingOrder", "Cashier");
+            }
+
+            // Nếu có lỗi, truyền lại danh sách bàn trống và dữ liệu đã nhập vào form
+            var tables = db.RestaurantTables.Where(p => p.StatusId == 2).ToList();
+            ViewBag.Tables = tables; // Truyền lại danh sách bàn trống khi có lỗi
+            return View(bookingOrder);
+        }
+        // hủy đơn
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CancelBooking(int bookingOrderId)
+        {
+            // Lấy đơn đặt bàn cần hủy
+            var bookingOrder = db.BookingOrders.FirstOrDefault(b => b.BookingOrderId == bookingOrderId);
+            if (bookingOrder != null)
+            {
+                // Cập nhật trạng thái bàn lại thành trống (StatusId = 2)
+                var table = db.RestaurantTables.FirstOrDefault(t => t.TableId == bookingOrder.TableId);
+                if (table != null)
+                {
+                    table.StatusId = 2; // Đặt lại trạng thái bàn thành "trống"
+                    db.SaveChanges();
+                }
+
+                // Xóa đơn đặt bàn
+                db.BookingOrders.Remove(bookingOrder);
+                db.SaveChanges();
+            }
+
+            // Quay lại danh sách đơn đặt bàn
+            return RedirectToAction("BookingOrder", "Cashier");
+        }
         public IActionResult Invoice()
         {
-            return View();
+            var invoices = db.Invoices.AsNoTracking().ToList();
+            return View(invoices);
         }
     }
 }

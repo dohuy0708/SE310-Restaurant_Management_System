@@ -1,26 +1,16 @@
 ﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.RestaurantTable>
 
-<div class="row">
-    @foreach (var item in Model)
-    {
-        <div class="col-md-3 grid-margin">
-            <div class="card bg-gradient-info card-img-holder text-white">
-                <div class="d-flex justify-content-between">
-                    <h3 class="mx-2 mt-2 mb-0">Bàn @item.TableNumber</h3>
-                    <h4 class="mx-2 mt-2 mb-0">@item.Location</h4>
-                </div>
-                <div class="card-body m-0">
-                    <button type="button" class="btn btn-gradient-warning btn-fw m-2"
-                            data-bs-toggle="modal" data-bs-target="#menuModal"
-                            onclick="showMenuModal(); setTableInfo('@item.TableNumber', '@item.Location')">
-                        Gọi món
-                    </button>
-                    <button type="button" class="btn btn-gradient-success btn-fw m-2">Đặt bàn</button>
-                </div>
-            </div>
-        </div>
-    }
+<div class="btn-group mb-3" role="group" aria-label="Chọn trạng thái bàn">
+    <button type="button" class="btn btn-secondary btn-danger" onclick="filterTables(null, this)">Tất cả</button>
+    <button type="button" class="btn btn-secondary" onclick="filterTables(1,this)">Đang đặt</button>
+    <button type="button" class="btn btn-secondary" onclick="filterTables(2,this)">Trống</button>
+    <button type="button" class="btn btn-secondary" onclick="filterTables(3,this)">Đang phục vụ</button>
 </div>
+
+<div id="tablesContainer">
+    @await Html.PartialAsync("_TablesPartial", Model)
+</div>
+
 
 <!-- Modal -->
 <!-- Modal -->
@@ -98,6 +88,27 @@
 
 <script>
     let orderedItems = []; // Mảng lưu các món đã gọi
+    function filterTables(status, button) {
+        // Gửi AJAX request để lọc danh sách bàn
+        $.ajax({
+            url: '@Url.Action("FilterTablesByStatus")',
+            type: 'GET',
+            data: { status: status },
+            success: function (data) {
+                $('#tablesContainer').html(data);
+
+                // Xóa lớp btn-selected khỏi tất cả các nút trong nhóm
+                $('.btn-group .btn').removeClass('btn-danger');
+
+                // Thêm lớp btn-selected vào nút hiện tại
+                $(button).addClass('btn-danger');
+            },
+            error: function (xhr, status, error) {
+                console.error("Không thể tải danh sách bàn:", error);
+            }
+        });
+    }
+
 
     function showMenuModal() {
         $.ajax({
