@@ -1,18 +1,24 @@
 ﻿<!-- _CashierSidebar.cshtml -->
 <li class="nav-item">
-    <a class="nav-link" href="/Cashier/Booking">
-        <span class="menu-title">Đặt bàn</span>
+    <a class="nav-link" asp-action="MenuItem">
+        <span class="menu-title">Menu</span>
         <i class="mdi mdi-table-chair menu-icon"></i>
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" href="/Cashier/Order">
-        <span class="menu-title">Gọi món</span>
+    <a class="nav-link" asp-action="Tables">
+        <span class="menu-title">Bàn</span>
+        <i class="mdi mdi-table-chair menu-icon"></i>   
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" asp-action="BookingOrder">
+        <span class="menu-title">Đơn đặt</span>
         <i class="mdi mdi-silverware menu-icon"></i>
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" href="/Cashier/Invoice">
+    <a class="nav-link" asp-action="Invoice">
         <span class="menu-title">Hóa đơn</span>
         <i class="mdi mdi-receipt menu-icon"></i>
     </a>

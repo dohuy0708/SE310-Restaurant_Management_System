@@ -1,17 +1,19 @@
 ﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.MenuItem>
 
-<div class="row">
+<div class="input-group-prepend mb-3" style="position:relative">
+    <button class="btn btn-sm btn-outline-primary dropdown-toggle  type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@ViewBag.Name</button>
+    <div class="dropdown-menu " style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 34px, 0px);" data-popper-placement="bottom-start">
+        @foreach (var subCategory in ViewBag.SubCategories)
+        {
+            <a class="dropdown-item"  asp-route-id="@subCategory.SubCategoryId">@subCategory.SubCategoryName</a>
 
-    @foreach(var item in Model)
+        }
+        
+    </div>
+</div>
+<div class="row">
+    @foreach (var item in Model)
     {
-        <div class="col-md-3  grid-margin">
-            <div class="card bg-gradient-danger card-img-holder text-white">
-                <div class="card-body m-2 p-0">
-                    <img class="w-100" src="/assets/images/Logo.png" />
-                    <h5 class="card-text">@item.Name</h5>
-                    <h4 class="mb-1 text-danger">@item.Price</h4>
-                </div>
-            </div>
-        </div>
+        @Html.Partial("MenuItemCard", item)
     }
 </div>

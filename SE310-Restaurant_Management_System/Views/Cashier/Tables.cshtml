@@ -1,0 +1,198 @@
+﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.RestaurantTable>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-3 grid-margin">
+            <div class="card bg-gradient-info card-img-holder text-white">
+                <div class="d-flex justify-content-between">
+                    <h3 class="mx-2 mt-2 mb-0">Bàn @item.TableNumber</h3>
+                    <h4 class="mx-2 mt-2 mb-0">@item.Location</h4>
+                </div>
+                <div class="card-body m-0">
+                    <button type="button" class="btn btn-gradient-warning btn-fw m-2"
+                            data-bs-toggle="modal" data-bs-target="#menuModal"
+                            onclick="showMenuModal(); setTableInfo('@item.TableNumber', '@item.Location')">
+                        Gọi món
+                    </button>
+                    <button type="button" class="btn btn-gradient-success btn-fw m-2">Đặt bàn</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal -->
+<!-- Modal -->
+<div class="modal fade" id="menuModal" tabindex="-1" role="dialog" aria-labelledby="menuModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom" role="document">
+        <div class="modal-content">
+            <style>
+                .modal-custom {
+                    max-width: 80%;
+                    width: auto;
+                }
+
+                .modal-body {
+                    max-height: 400px; /* Chiều cao tối đa cho modal body */
+                    overflow-y: auto; /* Thêm cuộn dọc nếu nội dung vượt quá chiều cao */
+                    display: flex; /* Sử dụng flex để chia cột */
+                }
+
+                .menu-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
+
+                .menu-list {
+                    flex: 1; /* Phần trái chiếm 1 phần */
+                    margin-right: 20px; /* Khoảng cách giữa hai cột */
+                }
+
+                .order-list {
+                    flex: 1; /* Phần phải chiếm 1 phần */
+                    border-left: 1px solid #ccc; /* Đường viền giữa hai phần */
+                    padding-left: 20px; /* Khoảng cách bên trái của danh sách đã gọi */
+                }
+            </style>
+            <div class="modal-header pb-0">
+                <div>
+                    <h3 class="modal-title mb-3" id="menuModalLabel">Chọn món</h3>
+                    <div class="input-group-prepend mb-3" style="position:relative">
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Danh mục</button>
+                        <div class="dropdown-menu">
+                            @foreach (var subCategory in ViewBag.SubCategories)
+                            {
+                                <a class="dropdown-item" href="#" onclick="loadMenuItems(@subCategory.SubCategoryId)">
+                                    @subCategory.SubCategoryName
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+ 
+               
+            </div>
+            <div class="modal-body pt-0">
+                <div class="menu-list" id="menuItemsContainer">
+                    <!-- Nội dung món ăn sẽ được tải vào đây -->
+                </div>
+                <div class="order-list">
+                    <h6>Các món đã gọi:</h6>
+                    <ul id="orderedItemsList">
+                        <!-- Các món đã gọi sẽ được thêm vào đây -->
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="confirmOrder()">Xác nhận đặt món</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    let orderedItems = []; // Mảng lưu các món đã gọi
+
+    function showMenuModal() {
+        $.ajax({
+            url: '@Url.Action("GetMenuItems")',
+            type: 'GET',
+            success: function (data) {
+                $('#menuItemsContainer').html(data);
+                $('#menuModal').modal('show'); // Hiển thị modal
+                addEventListeners(); // Thêm sự kiện cho các nút
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+    function loadMenuItems(subCategoryId) {
+
+        $.ajax({
+            url: '@Url.Action("GetMenuItems")',
+            type: 'GET',
+            data: { id: subCategoryId },
+            success: function (data) {
+                $('#menuItemsContainer').html(data);
+                addEventListeners(); // Thêm sự kiện cho các nút
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+
+
+    function addEventListeners() {
+        $('.add-to-order').off('click').on('click', function () {
+            const menuItemId = $(this).data('id');
+            const menuItemName = $(this).data('name'); // Lấy tên món ăn
+            addToOrder(menuItemId, menuItemName);
+        });
+
+        $('.remove-from-order').off('click').on('click', function () {
+            const menuItemId = $(this).data('id');
+            removeFromOrder(menuItemId);
+        });
+    }
+    function addToOrder(menuItemId, menuItemName) {
+        let item = orderedItems.find(i => i.id === menuItemId);
+
+        if (item) {
+            item.quantity++; // Tăng số lượng nếu món đã có
+            $(`#ordered-item-${menuItemId} .item-quantity`).text(item.quantity);
+        } else {
+            item = { id: menuItemId, name: menuItemName, quantity: 1 };
+            orderedItems.push(item);
+            $('#orderedItemsList').append(`
+                        <li id="ordered-item-${menuItemId}"  class="d-flex justify-content-between align-items-center mb-2" style="width: 50%">
+                  <div>  ${menuItemName} (<span class="item-quantity">1</span>) </div>
+                                <button class="btn btn-danger btn-sm remove-from-order " " data-id="${menuItemId}" onClick="removeFromOrder('${menuItemId}')">-</button>
+                </li>
+            `);
+
+            // Gọi lại addEventListeners để gán sự kiện cho các nút mới
+            addEventListeners();
+        }
+
+    }
+
+    function removeFromOrder(menuItemId) {
+        console.log("removeFromOrder called with menuItemId:", menuItemId);
+        const index = orderedItems.findIndex(i => i.id === menuItemId);
+
+        if (index !== -1) {
+            const item = orderedItems[index];
+            if (item.quantity > 1) {
+                item.quantity--; // Giảm số lượng nếu còn lớn hơn 1
+                $(`#ordered-item-${menuItemId} .item-quantity`).text(item.quantity);
+            } else {
+                orderedItems.splice(index, 1); // Xóa món khỏi danh sách nếu số lượng = 1
+                $(`#ordered-item-${menuItemId}`).remove(); // Xóa món khỏi danh sách hiển thị
+            }
+        } else {
+            console.log("Item with ID", menuItemId, "not found in orderedItems.");
+        }
+    }
+
+    function closeModal() {
+        $('#menuModal').modal('hide'); // Ẩn modal sau khi xác nhận
+        orderedItems = [];
+        $('#orderedItemsList').empty()
+    }
+    function confirmOrder() {
+        // Xử lý xác nhận đặt món
+        console.log("Đã xác nhận đặt món:", orderedItems);
+        // Bạn có thể gửi `orderedItems` đến server để lưu trữ hoặc xử lý thêm ở đây
+        $('#menuModal').modal('hide'); // Ẩn modal sau khi xác nhận
+        orderedItems = [];
+        $('#orderedItemsList').empty()
+    }
+</script>
