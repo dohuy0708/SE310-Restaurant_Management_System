@@ -88,6 +88,8 @@
 
 <script>
     let orderedItems = []; // Mảng lưu các món đã gọi
+    let selectedTableId = null;
+
     function filterTables(status, button) {
         // Gửi AJAX request để lọc danh sách bàn
         $.ajax({
@@ -110,7 +112,8 @@
     }
 
 
-    function showMenuModal() {
+    function showMenuModal(tableId) {
+        selectedTableId = tableId;
         $.ajax({
             url: '@Url.Action("GetMenuItems")',
             type: 'GET',
@@ -124,6 +127,13 @@
             }
         });
     }
+    // Thêm biến để lưu tableId được chọn
+
+    // Thêm hàm để mở modal và lưu tableId
+    // function openMenuModal(tableId) {
+    //     selectedTableId = tableId;
+    //     $('#menuModal').modal('show');
+    // }
     function loadMenuItems(subCategoryId) {
 
         $.ajax({
@@ -145,7 +155,9 @@
         $('.add-to-order').off('click').on('click', function () {
             const menuItemId = $(this).data('id');
             const menuItemName = $(this).data('name'); // Lấy tên món ăn
-            addToOrder(menuItemId, menuItemName);
+            const menuItemPrice = $(this).data('price'); // Lấy giá
+
+            addToOrder(menuItemId, menuItemName, menuItemPrice);
         });
 
         $('.remove-from-order').off('click').on('click', function () {
@@ -153,14 +165,14 @@
             removeFromOrder(menuItemId);
         });
     }
-    function addToOrder(menuItemId, menuItemName) {
+    function addToOrder(menuItemId, menuItemName, menuItemPrice) {
         let item = orderedItems.find(i => i.id === menuItemId);
 
         if (item) {
             item.quantity++; // Tăng số lượng nếu món đã có
             $(`#ordered-item-${menuItemId} .item-quantity`).text(item.quantity);
         } else {
-            item = { id: menuItemId, name: menuItemName, quantity: 1 };
+            item = { id: menuItemId, name: menuItemName,price:menuItemPrice, quantity: 1 };
             orderedItems.push(item);
             $('#orderedItemsList').append(`
                         <li id="ordered-item-${menuItemId}"  class="d-flex justify-content-between align-items-center mb-2" style="width: 50%">
@@ -198,12 +210,50 @@
         orderedItems = [];
         $('#orderedItemsList').empty()
     }
+    // Script trong tables.cshtml
     function confirmOrder() {
-        // Xử lý xác nhận đặt món
-        console.log("Đã xác nhận đặt món:", orderedItems);
-        // Bạn có thể gửi `orderedItems` đến server để lưu trữ hoặc xử lý thêm ở đây
-        $('#menuModal').modal('hide'); // Ẩn modal sau khi xác nhận
-        orderedItems = [];
-        $('#orderedItemsList').empty()
+        if (orderedItems.length === 0) {
+            alert('Vui lòng chọn ít nhất một món để đặt');
+            return;
+        }
+
+        // Lấy tableId từ button đặt món được click
+        const tableId = parseInt(selectedTableId);
+
+        const orderData = {
+            TableId: selectedTableId,
+            Items: orderedItems.map(item => ({
+                MenuItemId: item.id, // Đảm bảo MenuItemId được gán đúng
+                Quantity: item.quantity,
+                Price: item.price
+            }))
+        };
+
+        // Gửi request đến server
+       // console.log(orderData.Items); // Kiểm tra dữ liệu trước khi gửi
+        $.ajax({
+            url: '@Url.Action("ConfirmOrder")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(orderData),
+            success: function (response) {
+                if (response.success) {
+                    alert('Đặt món thành công!');
+                    $('#menuModal').modal('hide');
+                    orderedItems = [];
+                    $('#orderedItemsList').empty();
+                    // Refresh lại danh sách bàn
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + response.message);
+                }
+            },
+            error: function () {
+                alert('Đã xảy ra lỗi khi xử lý yêu cầu');
+            }
+        });
+
     }
+
+  
 </script>

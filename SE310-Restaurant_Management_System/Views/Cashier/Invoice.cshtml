@@ -1,1 +1,40 @@
 ﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.Invoice>
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Hóa đơn</h4>
+        <div class="table-responsive">  
+            <table class="table table-danger">
+                <thead>
+                    <tr>
+                        <th>Bàn</th>
+                        <th>Ngày</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="table-warning">
+                            <td>@item.TableId</td>
+                            <td>@item.InvoiceDate</td>
+                            <td>@item.TotalAmount</td>
+                            <td>@item.IsPaid</td>
+                            <td>
+                                <!-- Form hủy đặt bàn -->
+                                @* <form asp-action="CancelBooking" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="bookingOrderId" value="@item.BookingOrderId" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Hủy</button>
+                                </form> *@
+                                <button class="btn btn-sm btn-success">Thanh toán</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

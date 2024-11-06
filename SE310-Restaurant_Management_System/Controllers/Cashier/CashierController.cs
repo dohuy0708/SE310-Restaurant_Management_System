@@ -156,6 +156,85 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             // Quay lại danh sách đơn đặt bàn
             return RedirectToAction("BookingOrder", "Cashier");
         }
+
+        [HttpPost]
+        public IActionResult ConfirmOrder([FromBody] OrderViewModel orderData)
+        {
+            try
+            {
+                // Kiểm tra xem bàn đã có hóa đơn chưa thanh toán chưa
+                var existingInvoice = db.Invoices
+                    .FirstOrDefault(i => i.TableId == orderData.TableId && !i.IsPaid);
+
+                Invoice invoice;
+
+                if (existingInvoice == null)
+                {
+                    // Tạo hóa đơn mới nếu chưa có
+                    invoice = new Invoice
+                    {
+                        TableId = orderData.TableId,
+                        InvoiceDate = DateTime.Now,
+                        IsPaid = false,
+                        TotalAmount = 0
+                    };
+                    db.Invoices.Add(invoice);
+
+                    // Lưu lại Invoice để lấy InvoiceID
+                    db.SaveChanges();
+                }
+                else
+                {
+                    invoice = existingInvoice;
+                }
+
+                // Thêm các món đã đặt vào chi tiết hóa đơn
+                foreach (var item in orderData.Items)
+                {
+                    // Kiểm tra xem MenuItemID có tồn tại trong MenuItems không
+                    var menuItem = db.MenuItems.Find(item.MenuItemId);
+                    if (menuItem == null)
+                    {
+                        return Json(new { success = false, message = $"Món với ID {item.MenuItemId} không tồn tại." });
+                    }
+
+                    var invoiceItem = new InvoiceItem
+                    {
+                        InvoiceId = invoice.InvoiceId,
+                        MenuItemId = item.MenuItemId,
+                        Quantity = item.Quantity,
+                        Price = item.Price
+                    };
+                    db.InvoiceItems.Add(invoiceItem);
+                }
+
+                // Cập nhật tổng tiền
+                invoice.TotalAmount = (invoice.TotalAmount ?? 0) +
+                    orderData.Items.Sum(item => item.Price * item.Quantity);
+
+                // Cập nhật trạng thái bàn thành "Đang phục vụ" (status = 3)
+                var table = db.RestaurantTables.Find(orderData.TableId);
+                if (table != null)
+                {
+                    table.StatusId = 3; // Đang phục vụ
+                }
+
+                db.SaveChanges();
+
+                return Json(new { success = true });
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerException = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = $"An error occurred: {innerException}" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
         public IActionResult Invoice()
         {
             var invoices = db.Invoices.AsNoTracking().ToList();

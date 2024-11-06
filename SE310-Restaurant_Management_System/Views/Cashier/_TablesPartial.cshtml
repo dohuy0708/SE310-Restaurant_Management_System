@@ -3,8 +3,44 @@
 <div class="row">
     @foreach (var item in Model)
     {
+        // Xác định lớp nền cho thẻ dựa trên giá trị của statusId
+        var cardClass = item.StatusId switch
+        {
+            1 => "bg-gradient-success",
+            2 => "bg-gradient-info",
+            3 => "bg-gradient-danger",
+            _ => "bg-gradient-secondary" // mặc định nếu statusId không thuộc các giá trị trên
+        };
+
+        // Xác định văn bản, lớp CSS và hàm onclick cho nút "Đặt bàn" dựa trên giá trị của statusId
+        var reserveButtonText = item.StatusId switch
+        {
+            1 => "Hủy đặt",
+            3 => "Thanh toán",
+            _ => "Đặt bàn"
+        };
+
+        var reserveButtonClass = item.StatusId switch
+        {
+            1 => "btn-gradient-danger",
+            3 => "btn-gradient-primary",
+            _ => "btn-gradient-success"
+        };
+
+        var reserveOnClickFunction = item.StatusId switch
+        {
+            1 => $"cancelReservation({item.TableId})",   // Hàm hủy đặt bàn
+            3 => $"processPayment({item.TableId})",      // Hàm thanh toán
+            _ => $"reserveTable({item.TableId})"         // Hàm đặt bàn
+        };
+     @*     var aLink = item.StatusId switch
+         {
+             1 =>  "",   // Hàm hủy đặt bàn
+             3 => "",      // Hàm thanh toán
+             2 => ""         // Hàm đặt bàn
+         }; *@
         <div class="col-md-3 grid-margin">
-            <div class="card bg-gradient-info card-img-holder text-white">
+            <div class="card @cardClass card-img-holder text-white">
                 <div class="d-flex justify-content-between">
                     <h3 class="mx-2 mt-2 mb-0">Bàn @item.TableNumber</h3>
                     <h4 class="mx-2 mt-2 mb-0">@item.Location</h4>
@@ -12,10 +48,14 @@
                 <div class="card-body m-0">
                     <button type="button" class="btn btn-gradient-warning btn-fw m-2"
                             data-bs-toggle="modal" data-bs-target="#menuModal"
-                            onclick="showMenuModal(); setTableInfo('@item.TableNumber', '@item.Location')">
+                            onclick="showMenuModal(@item.TableId); setTableInfo('@item.TableNumber', '@item.Location')">
                         Gọi món
                     </button>
-                    <button type="button" class="btn btn-gradient-success btn-fw m-2">Đặt bàn</button>
+                    <button type="button" class="btn @reserveButtonClass btn-fw m-2"
+                            onclick="@reserveOnClickFunction">
+                 @*        @aLink *@
+                        @reserveButtonText
+                    </button>
                 </div>
             </div>
         </div>
