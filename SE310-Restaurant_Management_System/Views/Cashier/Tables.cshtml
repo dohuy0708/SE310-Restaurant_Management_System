@@ -85,6 +85,25 @@
 </div>
 
 
+<div class="modal fade" id="invoiceDetailsModalInTable" tabindex="-1" aria-labelledby="invoiceDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="invoiceDetailsLabel">Chi tiết hóa đơn</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="invoiceDetailsContentInTable">
+                <!-- Nội dung chi tiết hóa đơn sẽ được nạp ở đây -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button id="payButton" type="button" class="btn btn-primary" onclick="executePayment()" style="display: none;">Thanh toán</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     let orderedItems = []; // Mảng lưu các món đã gọi
@@ -110,6 +129,7 @@
             }
         });
     }
+
     function cancelReservation(tableId) {
         if (confirm("Bạn có chắc chắn muốn hủy đặt bàn này?")) {
             $.ajax({
@@ -131,7 +151,44 @@
         }
     }
 
+    function confirmPaymentForTable(tableId) {
+        $.ajax({
+            url: '@Url.Action("GetInvoiceDetailsByTableId", "Cashier")',
+            type: 'GET',
+            data: { tableId: tableId },
+            success: function (data) {
+                $('#invoiceDetailsContentInTable').html(data);
+                var invoiceId = $('#invoiceDetailsContentInTable').find('#invoiceId').val();
+                $('#invoiceDetailsModalInTable').data('invoice-id', invoiceId);
+                $('#payButton').show();
+                $('#invoiceDetailsModalInTable').modal('show');
+            },
+            error: function () {
+                alert("Có lỗi xảy ra khi tải chi tiết hóa đơn.");
+            }
+        });
+    }
+    function executePayment() {
+        const invoiceId = $('#invoiceDetailsModalInTable').data('invoice-id');
 
+        $.ajax({
+            url: '@Url.Action("ConfirmPayment", "Cashier")',
+            type: 'POST',
+            data: { id: invoiceId },
+            success: function (response) {
+                if (response.success) {
+                    alert("Thanh toán thành công!");
+                    $('#invoiceDetailsModal').modal('hide');
+                    location.reload(); // Tải lại trang để cập nhật trạng thái
+                } else {
+                    alert("Có lỗi xảy ra: " + response.message);
+                }
+            },
+            error: function () {
+                alert("Đã xảy ra lỗi khi xử lý yêu cầu thanh toán.");
+            }
+        });
+    }
 
     function showMenuModal(tableId) {
         selectedTableId = tableId;
@@ -148,13 +205,7 @@
             }
         });
     }
-    // Thêm biến để lưu tableId được chọn
 
-    // Thêm hàm để mở modal và lưu tableId
-    // function openMenuModal(tableId) {
-    //     selectedTableId = tableId;
-    //     $('#menuModal').modal('show');
-    // }
     function loadMenuItems(subCategoryId) {
 
         $.ajax({
@@ -171,7 +222,6 @@
         });
     }
 
-
     function addEventListeners() {
         $('.add-to-order').off('click').on('click', function () {
             const menuItemId = $(this).data('id');
@@ -186,6 +236,7 @@
             removeFromOrder(menuItemId);
         });
     }
+
     function addToOrder(menuItemId, menuItemName, menuItemPrice) {
         let item = orderedItems.find(i => i.id === menuItemId);
 
@@ -231,7 +282,7 @@
         orderedItems = [];
         $('#orderedItemsList').empty()
     }
-    // Script trong tables.cshtml
+
     function confirmOrder() {
         if (orderedItems.length === 0) {
             alert('Vui lòng chọn ít nhất một món để đặt');

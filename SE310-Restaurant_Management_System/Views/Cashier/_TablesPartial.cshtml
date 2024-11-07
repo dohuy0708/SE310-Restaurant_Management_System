@@ -15,7 +15,7 @@
         var reserveOnClickFunction = item.StatusId switch
         {
             1 => $"cancelReservation({item.TableId})",   // Hàm hủy đặt bàn
-            3 => $"processPayment({item.TableId})",      // Hàm thanh toán
+            3 => $"confirmPaymentForTable({item.TableId})",      // Hàm thanh toán
             _ => $"reserveTable({item.TableId})"         // Hàm đặt bàn
         };
      

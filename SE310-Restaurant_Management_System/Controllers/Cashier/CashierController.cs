@@ -360,6 +360,22 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
     return PartialView("_InvoiceDetailsPartial", invoice);
 }
 
+        public IActionResult GetInvoiceDetailsByTableId(int tableId)
+        {
+            // Tìm hóa đơn chưa thanh toán (IsPaid = false) có TableId là tableId
+            var invoice = db.Invoices
+                             .Include(i => i.InvoiceItems)
+                             .ThenInclude(ii => ii.MenuItem) // Bao gồm thông tin của MenuItem (nếu có)
+                             .FirstOrDefault(i => i.TableId == tableId && !i.IsPaid);
+
+            if (invoice == null) // Kiểm tra nếu không tìm thấy hóa đơn nào
+            {
+                return NotFound("Không tìm thấy hóa đơn chưa thanh toán cho bàn này.");
+            }
+            ViewData["InvoiceId"] = invoice.InvoiceId;
+            return PartialView("_InvoiceDetailsPartial", invoice); // Trả về PartialView chứa hóa đơn tìm được
+
+        }
 
     }
 }
