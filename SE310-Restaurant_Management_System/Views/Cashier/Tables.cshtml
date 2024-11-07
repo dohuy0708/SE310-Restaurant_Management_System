@@ -131,25 +131,51 @@
     }
 
     function cancelReservation(tableId) {
-        if (confirm("Bạn có chắc chắn muốn hủy đặt bàn này?")) {
-            $.ajax({
-                url: '@Url.Action("CancelReservation")', // Action hủy đặt bàn trong controller
-                type: 'POST',
-                data: { id: tableId },
-                success: function (response) {
-                    if (response.success) {
-                        alert("Hủy đặt bàn thành công!");
-                        location.reload(); // Refresh lại trang để cập nhật trạng thái
-                    } else {
-                        alert("Có lỗi xảy ra: " + response.message);
+        Swal.fire({
+            title: 'Bạn có chắc chắn muốn hủy đặt bàn này?',
+            text: "Thao tác này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Nếu người dùng xác nhận hủy đặt bàn
+                $.ajax({
+                    url: '@Url.Action("CancelReservation")', // Action hủy đặt bàn trong controller
+                    type: 'POST',
+                    data: { id: tableId },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire(
+                                'Thành công!',
+                                'Hủy đặt bàn thành công!',
+                                'success'
+                            ).then(() => {
+                                location.reload(); // Refresh lại trang để cập nhật trạng thái
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: 'Có lỗi xảy ra: ' + response.message,
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Đã xảy ra lỗi khi xử lý yêu cầu hủy đặt bàn.',
+                        });
                     }
-                },
-                error: function () {
-                    alert("Đã xảy ra lỗi khi xử lý yêu cầu hủy đặt bàn.");
-                }
-            });
-        }
+                });
+            }
+        });
     }
+
 
     function confirmPaymentForTable(tableId) {
         $.ajax({
@@ -164,7 +190,11 @@
                 $('#invoiceDetailsModalInTable').modal('show');
             },
             error: function () {
-                alert("Có lỗi xảy ra khi tải chi tiết hóa đơn.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra khi tải chi tiết hóa đơn',
+                });
             }
         });
     }
@@ -177,18 +207,33 @@
             data: { id: invoiceId },
             success: function (response) {
                 if (response.success) {
-                    alert("Thanh toán thành công!");
-                    $('#invoiceDetailsModal').modal('hide');
-                    location.reload(); // Tải lại trang để cập nhật trạng thái
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thanh toán thành công!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        $('#invoiceDetailsModalInTable').modal('hide');
+                        location.reload(); // Tải lại trang để cập nhật trạng thái
+                    });
                 } else {
-                    alert("Có lỗi xảy ra: " + response.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Có lỗi xảy ra: ' + response.message,
+                    });
                 }
             },
             error: function () {
-                alert("Đã xảy ra lỗi khi xử lý yêu cầu thanh toán.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Đã xảy ra lỗi khi xử lý yêu cầu thanh toán.',
+                });
             }
         });
     }
+
 
     function showMenuModal(tableId) {
         selectedTableId = tableId;
@@ -201,7 +246,11 @@
                 addEventListeners(); // Thêm sự kiện cho các nút
             },
             error: function (xhr, status, error) {
-                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra: '+ error,
+                });
             }
         });
     }
@@ -217,7 +266,11 @@
                 addEventListeners(); // Thêm sự kiện cho các nút
             },
             error: function (xhr, status, error) {
-                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra: ' + error,
+                });
             }
         });
     }
@@ -260,7 +313,6 @@
     }
 
     function removeFromOrder(menuItemId) {
-        console.log("removeFromOrder called with menuItemId:", menuItemId);
         const index = orderedItems.findIndex(i => i.id === menuItemId);
 
         if (index !== -1) {
@@ -273,7 +325,11 @@
                 $(`#ordered-item-${menuItemId}`).remove(); // Xóa món khỏi danh sách hiển thị
             }
         } else {
-            console.log("Item with ID", menuItemId, "not found in orderedItems.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Không tìm thấy món ăn',
+            });
         }
     }
 
@@ -285,9 +341,14 @@
 
     function confirmOrder() {
         if (orderedItems.length === 0) {
-            alert('Vui lòng chọn ít nhất một món để đặt');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thông báo',
+                text: 'Vui lòng chọn ít nhất một món để đặt',
+            });
             return;
         }
+
 
         // Lấy tableId từ button đặt món được click
         const tableId = parseInt(selectedTableId);
@@ -310,18 +371,35 @@
             data: JSON.stringify(orderData),
             success: function (response) {
                 if (response.success) {
-                    alert('Đặt món thành công!');
-                    $('#menuModal').modal('hide');
-                    orderedItems = [];
-                    $('#orderedItemsList').empty();
-                    // Refresh lại danh sách bàn
-                    location.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: 'Gọi món thành công!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(()=>{
+                        $('#menuModal').modal('hide');
+                        orderedItems = [];
+                        $('#orderedItemsList').empty();
+                        // Refresh lại danh sách bàn
+                        location.reload();
+                    });
+
+                  
                 } else {
-                    alert('Có lỗi xảy ra: ' + response.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Có lỗi xảy ra: ' + response.message,
+                    });
                 }
             },
             error: function () {
-                alert('Đã xảy ra lỗi khi xử lý yêu cầu');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Đã xảy ra lỗi khi xử lý yêu cầu',
+                });
             }
         });
 

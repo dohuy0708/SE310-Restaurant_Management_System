@@ -95,15 +95,31 @@
             data: { id: invoiceId },
             success: function (response) {
                 if (response.success) {
-                    alert("Thanh toán thành công!");
-                    $('#invoiceDetailsModal').modal('hide');
-                    location.reload(); // Tải lại trang để cập nhật trạng thái
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thanh toán thành công!',
+                        text: '',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        $('#invoiceDetailsModal').modal('hide');
+                        location.reload(); // Tải lại trang để cập nhật trạng thái
+                    });
+                   
                 } else {
-                    alert("Có lỗi xảy ra: " + response.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Có lỗi xảy ra: ' + response.message,
+                    });
                 }
             },
             error: function () {
-                alert("Đã xảy ra lỗi khi xử lý yêu cầu thanh toán.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Đã xảy ra lỗi khi xử lý yêu cầu thanh toán.',
+                });
             }
         });
     }

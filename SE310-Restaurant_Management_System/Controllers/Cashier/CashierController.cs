@@ -152,6 +152,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
                 // Xóa đơn đặt bàn
                 db.BookingOrders.Remove(bookingOrder);
                 db.SaveChanges();
+                TempData["SuccessMessage"] = "Đã hủy đơn đặt bàn thành công!";
             }
 
             // Quay lại danh sách đơn đặt bàn

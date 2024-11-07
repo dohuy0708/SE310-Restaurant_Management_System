@@ -1,4 +1,21 @@
 ﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.BookingOrder>
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: '',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    </script>
+}
 
 <div class="card">
     <div class="card-body">
@@ -27,10 +44,11 @@
                             <td>@item.DepositAmount đ</td>
                             <td>
                                 <!-- Form hủy đặt bàn -->
-                                <form asp-action="CancelBooking" method="post" style="display:inline;">
+                              
+                                <form id="cancelBookingForm-@item.BookingOrderId" asp-action="CancelBooking" method="post" style="display:inline;">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="bookingOrderId" value="@item.BookingOrderId" />
-                                    <button type="submit" class="btn btn-sm btn-danger">Hủy</button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmCancelBooking(@item.BookingOrderId)">Hủy</button>
                                 </form>
 
                             </td>
@@ -41,3 +59,23 @@
         </div>
     </div>
 </div>
+<script>
+    function confirmCancelBooking(bookingOrderId) {
+        Swal.fire({
+            title: 'Bạn có chắc chắn muốn hủy đặt bàn?',
+            text: "Hành động này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Có, hủy đặt bàn!',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tìm form theo id và submit
+                document.getElementById(`cancelBookingForm-${bookingOrderId}`).submit();
+            }
+        });
+    }
+
+</script>
