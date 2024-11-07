@@ -216,7 +216,21 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
                 var table = db.RestaurantTables.Find(orderData.TableId);
                 if (table != null)
                 {
-                    table.StatusId = 3; // Đang phục vụ
+                    // Kiểm tra nếu bàn đang ở trạng thái "Đang đặt" (statusId = 1)
+                    if (table.StatusId == 1)
+                    {
+                        // Tìm và xóa đơn đặt bàn có TableId khớp với bàn hiện tại
+                        var bookingOrder = db.BookingOrders
+                            .FirstOrDefault(b => b.TableId == orderData.TableId);
+
+                        if (bookingOrder != null)
+                        {
+                            db.BookingOrders.Remove(bookingOrder);
+                        }
+                    }
+
+                    // Đổi trạng thái bàn thành "Đang phục vụ" (statusId = 3)
+                    table.StatusId = 3;
                 }
 
                 db.SaveChanges();
@@ -240,5 +254,72 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             var invoices = db.Invoices.AsNoTracking().ToList();
             return View(invoices);
         }
+        [HttpPost]
+        public IActionResult ConfirmPayment(int id)
+        {
+            // Tìm hóa đơn theo ID
+            var invoice = db.Invoices.Include(i => i.Table) // Đảm bảo tải thông tin bàn của hóa đơn
+                                      .FirstOrDefault(i => i.InvoiceId == id);
+
+            if (invoice == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy hóa đơn." });
+            }
+
+            // Đổi trạng thái hóa đơn sang đã thanh toán
+            invoice.IsPaid = true;
+
+            // Tìm bàn liên quan và đổi trạng thái thành "trống" (StatusId = 2)
+            if (invoice.Table != null)
+            {
+                invoice.Table.StatusId = 2; // Giả sử StatusId = 2 là trạng thái "trống"
+            }
+            else
+            {
+                return Json(new { success = false, message = "Không tìm thấy bàn liên quan đến hóa đơn này." });
+            }
+
+            try
+            {
+                db.SaveChanges(); // Lưu thay đổi vào cơ sở dữ liệu
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult FilterInvoices(bool? isPaid)
+        {
+            // Lọc hóa đơn theo trạng thái thanh toán
+            var invoices = db.Invoices.AsQueryable();
+
+            if (isPaid.HasValue)
+            {
+                invoices = invoices.Where(i => i.IsPaid == isPaid.Value);
+            }
+
+            // Trả về PartialView với danh sách hóa đơn đã lọc
+            return PartialView("_InvoicesPartial", invoices.ToList());
+        }
+        public IActionResult GetInvoiceDetails(int id)
+{
+    var invoice = db.Invoices
+                    .Include(i => i.InvoiceItems)
+                    .ThenInclude(ii => ii.MenuItem) // Include thông tin menu item nếu có
+                    .FirstOrDefault(i => i.InvoiceId == id);
+
+    if (invoice == null)
+    {
+        return NotFound("Không tìm thấy hóa đơn.");
+    }
+
+    return PartialView("_InvoiceDetailsPartial", invoice);
+}
+
+
     }
 }
+

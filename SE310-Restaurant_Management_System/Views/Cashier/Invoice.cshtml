@@ -1,40 +1,110 @@
 ﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.Invoice>
 
-<div class="card">
-    <div class="card-body">
-        <h4 class="card-title">Hóa đơn</h4>
-        <div class="table-responsive">  
-            <table class="table table-danger">
-                <thead>
-                    <tr>
-                        <th>Bàn</th>
-                        <th>Ngày</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr class="table-warning">
-                            <td>@item.TableId</td>
-                            <td>@item.InvoiceDate</td>
-                            <td>@item.TotalAmount</td>
-                            <td>@item.IsPaid</td>
-                            <td>
-                                <!-- Form hủy đặt bàn -->
-                                @* <form asp-action="CancelBooking" method="post" style="display:inline;">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="bookingOrderId" value="@item.BookingOrderId" />
-                                    <button type="submit" class="btn btn-sm btn-danger">Hủy</button>
-                                </form> *@
-                                <button class="btn btn-sm btn-success">Thanh toán</button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<div class="btn-group mb-3" role="group" aria-label="Chọn loại hóa đơn">
+    <button type="button" class="btn btn-secondary btn-danger" onclick="filterInvoices(null, this)">Tất cả</button>
+    <button type="button" class="btn btn-secondary" onclick="filterInvoices(true, this)">Đã thanh toán</button>
+    <button type="button" class="btn btn-secondary" onclick="filterInvoices(false, this)">Chưa thanh toán</button>
+</div>
+
+<div id="invoicesContainer">
+    @await Html.PartialAsync("_InvoicesPartial", Model)
+</div>
+<div class="modal fade" id="invoiceDetailsModal" tabindex="-1" aria-labelledby="invoiceDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="invoiceDetailsLabel">Chi tiết hóa đơn</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="invoiceDetailsContent">
+                <!-- Nội dung chi tiết hóa đơn sẽ được nạp ở đây -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button id="payButton" type="button" class="btn btn-primary" onclick="executePayment()" style="display: none;">Thanh toán</button>
+            </div>
         </div>
     </div>
 </div>
+    
+<script>
+    function filterInvoices(isPaid, button) {
+        // Xóa lựa chọn hiện tại và thêm lớp `active` cho nút đang chọn
+        document.querySelectorAll('.btn-group button').forEach(btn => btn.classList.remove('btn-danger'));
+        button.classList.add('btn-danger');
+
+        // Gửi yêu cầu AJAX đến server để lọc hóa đơn
+        $.ajax({
+            url: '@Url.Action("FilterInvoices", "Cashier")',
+            type: 'GET',
+            data: { isPaid: isPaid },
+            success: function (result) {
+                // Cập nhật danh sách hóa đơn
+                $('#invoicesContainer').html(result);
+            },
+            error: function () {
+                alert("Có lỗi xảy ra khi tải danh sách hóa đơn.");
+            }
+        });
+    }
+    // Hàm xử lý sự kiện OnClick cho nút Thanh toán
+    function confirmPayment(invoiceId) {
+        $.ajax({
+            url: '@Url.Action("GetInvoiceDetails", "Cashier")', // Action để lấy chi tiết hóa đơn
+            type: 'GET',
+            data: { id: invoiceId },
+            success: function (data) {
+                // Hiển thị chi tiết hóa đơn trong modal
+                $('#invoiceDetailsContent').html(data);
+                $('#invoiceDetailsModal').data('invoice-id', invoiceId);
+                // Hiển thị modal
+                $('#invoiceDetailsModal').modal('show');
+            },
+            error: function () {
+                alert("Đã xảy ra lỗi khi tải chi tiết hóa đơn.");
+            }
+        });
+    }
+
+
+   
+    // Hàm xử lý sự kiện OnClick cho nút Xem chi tiết
+    function showInvoiceDetails(invoiceId) {
+        $.ajax({
+            url: '@Url.Action("GetInvoiceDetails", "Cashier")',
+            type: 'GET',
+            data: { id: invoiceId },
+            success: function (data) {
+                $('#invoiceDetailsContent').html(data);
+                $('#invoiceDetailsModal').modal('show');
+            },
+            error: function () {
+                alert("Có lỗi xảy ra khi tải chi tiết hóa đơn.");
+            }
+        });
+    }
+    function executePayment() {
+        const invoiceId = $('#invoiceDetailsModal').data('invoice-id');
+
+        $.ajax({
+            url: '@Url.Action("ConfirmPayment", "Cashier")',
+            type: 'POST',
+            data: { id: invoiceId },
+            success: function (response) {
+                if (response.success) {
+                    alert("Thanh toán thành công!");
+                    $('#invoiceDetailsModal').modal('hide');
+                    location.reload(); // Tải lại trang để cập nhật trạng thái
+                } else {
+                    alert("Có lỗi xảy ra: " + response.message);
+                }
+            },
+            error: function () {
+                alert("Đã xảy ra lỗi khi xử lý yêu cầu thanh toán.");
+            }
+        });
+    }
+
+</script>
