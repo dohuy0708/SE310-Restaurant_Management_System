@@ -110,6 +110,27 @@
             }
         });
     }
+    function cancelReservation(tableId) {
+        if (confirm("Bạn có chắc chắn muốn hủy đặt bàn này?")) {
+            $.ajax({
+                url: '@Url.Action("CancelReservation")', // Action hủy đặt bàn trong controller
+                type: 'POST',
+                data: { id: tableId },
+                success: function (response) {
+                    if (response.success) {
+                        alert("Hủy đặt bàn thành công!");
+                        location.reload(); // Refresh lại trang để cập nhật trạng thái
+                    } else {
+                        alert("Có lỗi xảy ra: " + response.message);
+                    }
+                },
+                error: function () {
+                    alert("Đã xảy ra lỗi khi xử lý yêu cầu hủy đặt bàn.");
+                }
+            });
+        }
+    }
+
 
 
     function showMenuModal(tableId) {

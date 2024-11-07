@@ -48,13 +48,22 @@
             <div class="form-group row">
                 <label asp-for="TableId" class="col-sm-3 col-form-label">Table</label>
                 <div class="col-sm-9">
-                    <select asp-for="TableId" class="form-control">
+                    <select asp-for="TableId" class="form-control" style="color:black; font-size:medium">
                         <option value="">-- Select a Table --</option>
-                        @foreach (var table in ViewBag.Tables as List<RestaurantTable>)
+                        @foreach (var table in (ViewBag.Tables as List<RestaurantTable>))
                         {
-                            <option value="@table.TableId">@table.TableId</option>
+                            if (table.TableId == ViewBag.SelectedTableId)
+                            {
+                                <option value="@table.TableId" selected>@table.TableId</option>
+                            }
+                            else
+                            {
+                                <option value="@table.TableId">@table.TableId</option>
+                            }
                         }
                     </select>
+
+
                     <span asp-validation-for="TableId" class="text-danger"></span>
                 </div>
             </div>

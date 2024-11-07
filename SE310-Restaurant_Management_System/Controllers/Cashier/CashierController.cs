@@ -92,13 +92,14 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             return View(orders);
         }
         [HttpGet]
-        public IActionResult Booking()
-        {
+        public IActionResult Booking(int? tableId)
+        {           
             // Lấy danh sách bàn trống từ cơ sở dữ liệu
             var tables = db.RestaurantTables.Where(p => p.StatusId == 2).ToList();
 
-            // Truyền danh sách bàn vào ViewBag để sử dụng trong View
+            // Truyền danh sách bàn và tableId vào ViewBag
             ViewBag.Tables = tables;
+            ViewBag.SelectedTableId = tableId; // Truyền tableId của bàn đã chọn vào ViewBag
 
             return View();
         }
@@ -155,6 +156,46 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
 
             // Quay lại danh sách đơn đặt bàn
             return RedirectToAction("BookingOrder", "Cashier");
+        }
+        // hủy đặt bàn dùng ajax - bên view tables
+        [HttpPost]
+        public IActionResult CancelReservation(int id)
+        {
+            try
+            {
+                // Tìm bàn cần hủy đặt
+                var table = db.RestaurantTables.Find(id);
+                if (table == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bàn." });
+                }
+
+                // Kiểm tra nếu bàn đang ở trạng thái "Đặt bàn" (statusId = 1)
+                if (table.StatusId == 1)
+                {
+                    // Đổi trạng thái bàn thành "Trống" (statusId = 2)
+                    table.StatusId = 2;
+
+                    // Tìm đơn đặt bàn có TableId khớp với bàn và xóa
+                    var bookingOrder = db.BookingOrders.FirstOrDefault(b => b.TableId == id);
+                    if (bookingOrder != null)
+                    {
+                        db.BookingOrders.Remove(bookingOrder);
+                    }
+
+                    // Lưu thay đổi
+                    db.SaveChanges();
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bàn không ở trạng thái đặt." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]

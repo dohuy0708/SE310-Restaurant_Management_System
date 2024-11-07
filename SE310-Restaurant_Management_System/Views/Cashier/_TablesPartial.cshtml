@@ -12,33 +12,13 @@
             _ => "bg-gradient-secondary" // mặc định nếu statusId không thuộc các giá trị trên
         };
 
-        // Xác định văn bản, lớp CSS và hàm onclick cho nút "Đặt bàn" dựa trên giá trị của statusId
-        var reserveButtonText = item.StatusId switch
-        {
-            1 => "Hủy đặt",
-            3 => "Thanh toán",
-            _ => "Đặt bàn"
-        };
-
-        var reserveButtonClass = item.StatusId switch
-        {
-            1 => "btn-gradient-danger",
-            3 => "btn-gradient-primary",
-            _ => "btn-gradient-success"
-        };
-
         var reserveOnClickFunction = item.StatusId switch
         {
             1 => $"cancelReservation({item.TableId})",   // Hàm hủy đặt bàn
             3 => $"processPayment({item.TableId})",      // Hàm thanh toán
             _ => $"reserveTable({item.TableId})"         // Hàm đặt bàn
         };
-     @*     var aLink = item.StatusId switch
-         {
-             1 =>  "",   // Hàm hủy đặt bàn
-             3 => "",      // Hàm thanh toán
-             2 => ""         // Hàm đặt bàn
-         }; *@
+     
         <div class="col-md-3 grid-margin">
             <div class="card @cardClass card-img-holder text-white">
                 <div class="d-flex justify-content-between">
@@ -51,11 +31,27 @@
                             onclick="showMenuModal(@item.TableId); setTableInfo('@item.TableNumber', '@item.Location')">
                         Gọi món
                     </button>
-                    <button type="button" class="btn @reserveButtonClass btn-fw m-2"
-                            onclick="@reserveOnClickFunction">
-                 @*        @aLink *@
-                        @reserveButtonText
+                    <!-- Nút Đặt bàn -->
+            @if (item.StatusId == 2)  
+            {
+                <form method="get" action="@Url.Action("Booking","Cashier")" style="display:inline;">
+                    <input type="hidden" name="TableId" value="@item.TableId" />
+                    <button type="submit" class="btn btn-gradient-success btn-fw m-2">
+                        Đặt bàn
                     </button>
+                </form>
+
+            }else if (item.StatusId == 1) 
+            {
+                        <button type="button" class="btn btn-gradient-danger btn-fw m-2" onclick="@reserveOnClickFunction">
+                    Hủy đặt
+                </button>
+            }else if (item.StatusId == 3)  
+            {
+                        <button type="button" class="btn btn-gradient-primary btn-fw m-2" onclick="@reserveOnClickFunction">
+                    Thanh toán
+                </button>
+            }
                 </div>
             </div>
         </div>
