@@ -1,21 +1,31 @@
-﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.Invoice>
+﻿@* @model IPagedList<SE310_Restaurant_Management_System.Models.Invoice> *@
+@using X.PagedList.Mvc.Core
+@model X.PagedList.IPagedList<Invoice>
+
+@{
+    var isPaid = ViewData["IsPaid"] as bool?;
+}
 
 <div class="btn-group mb-3" role="group" aria-label="Chọn loại hóa đơn">
-    <button type="button" class="btn btn-secondary btn-danger" onclick="filterInvoices(null, this)">Tất cả</button>
-    <button type="button" class="btn btn-secondary" onclick="filterInvoices(true, this)">Đã thanh toán</button>
-    <button type="button" class="btn btn-secondary" onclick="filterInvoices(false, this)">Chưa thanh toán</button>
+    <button type="button" class="btn btn-secondary @(isPaid == null ? "btn-danger" : "")" onclick="filterInvoices(null, this)">Tất cả</button>
+    <button type="button" class="btn btn-secondary @(isPaid == true ? "btn-danger" : "")" onclick="filterInvoices(true, this)">Đã thanh toán</button>
+    <button type="button" class="btn btn-secondary @(isPaid == false ? "btn-danger" : "")" onclick="filterInvoices(false, this)">Chưa thanh toán</button>
 </div>
+
 
 <div id="invoicesContainer">
     @await Html.PartialAsync("_InvoicesPartial", Model)
 </div>
 
+
+
+
 <div class="modal fade" id="invoiceDetailsModal" tabindex="-1" aria-labelledby="invoiceDetailsLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="invoiceDetailsLabel">Chi tiết hóa đơn</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <div class="modal-header" style="padding: 0.5rem 1rem;">
+                <h3 class="modal-title" id="invoiceDetailsLabel">Chi tiết hóa đơn</h3>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; font-size: 26px; line-height: 0;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -32,24 +42,53 @@
     
 <script>
     function filterInvoices(isPaid, button) {
-        // Xóa lựa chọn hiện tại và thêm lớp `active` cho nút đang chọn
+        // Lưu lại trạng thái lựa chọn
         document.querySelectorAll('.btn-group button').forEach(btn => btn.classList.remove('btn-danger'));
         button.classList.add('btn-danger');
 
-        // Gửi yêu cầu AJAX đến server để lọc hóa đơn
+        // Lưu lại trạng thái isPaid trong ViewData để gửi cùng trong phân trang
+        var currentIsPaid = isPaid;
+
+        // Gửi yêu cầu AJAX để lọc hóa đơn
         $.ajax({
-            url: '@Url.Action("FilterInvoices", "Cashier")',
+            url: '@Url.Action("Invoice", "Cashier")',
             type: 'GET',
-            data: { isPaid: isPaid },
+            data: { isPaid: currentIsPaid, page: 1 },  // Reset page to 1 khi lọc
             success: function (result) {
                 // Cập nhật danh sách hóa đơn
-                $('#invoicesContainer').html(result);
+                $('#invoicesContainer').html(result);  // Cập nhật danh sách hóa đơn
             },
             error: function () {
                 alert("Có lỗi xảy ra khi tải danh sách hóa đơn.");
             }
         });
     }
+
+    // Cập nhật hàm để gửi tham số trang và isPaid khi phân trang
+    $(document).on('click', '.pagination-container a', function (e) {
+        e.preventDefault();  // Ngăn chặn hành động mặc định của phân trang
+
+        var page = $(this).attr('data-page');  // Lấy trang từ thuộc tính data-page
+        var isPaid = $('.btn-danger').attr('data-isPaid');  // Lấy trạng thái isPaid từ nút hiện tại
+
+        // Gửi yêu cầu AJAX để lấy dữ liệu trang mới với trạng thái lọc
+        $.ajax({
+            url: '@Url.Action("Invoice", "Cashier")',
+            type: 'GET',
+            data: { page: page, isPaid: isPaid },  // Truyền lại cả trang và trạng thái isPaid
+            success: function (result) {
+                // Cập nhật lại danh sách hóa đơn và phân trang
+                $('#invoicesContainer').html(result);
+            },
+            error: function () {
+                alert("Có lỗi xảy ra khi tải danh sách hóa đơn.");
+            }
+        });
+    });
+
+
+    
+
     // Hàm xử lý sự kiện OnClick cho nút Thanh toán
     function confirmPayment(invoiceId) {
         $.ajax({

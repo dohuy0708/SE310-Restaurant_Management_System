@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SE310_Restaurant_Management_System.Models;
-
+using X.PagedList;
+using X.PagedList.Extensions;
 namespace SE310_Restaurant_Management_System.Controllers.Cashier
 {
     public class CashierController : Controller
@@ -291,11 +292,35 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
         }
 
 
-        public IActionResult Invoice()
+        public IActionResult Invoice(int? page, bool? isPaid)
         {
-            var invoices = db.Invoices.AsNoTracking().ToList();
-            return View(invoices);
+            int pageSize = 8;
+            int pageNumber = page ?? 1;  // Sử dụng page nếu có, mặc định là trang 1
+            ViewData["IsPaid"] = null;
+            // Lọc hóa đơn nếu isPaid được truyền vào
+            var invoices = db.Invoices.AsNoTracking();
+            if (isPaid.HasValue)
+            {
+                invoices = invoices.Where(i => i.IsPaid == isPaid.Value);
+                ViewData["IsPaid"] = isPaid.Value;
+            }
+
+            // Phân trang và sắp xếp danh sách hóa đơn theo ngày giảm dần
+            var pagedInvoices = invoices.OrderByDescending(i => i.InvoiceDate)
+                                         .ToPagedList(pageNumber, pageSize);
+
+            // Kiểm tra nếu yêu cầu là AJAX để trả về partial view
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_InvoicesPartial", pagedInvoices);  // Trả về partial view chứa danh sách hóa đơn
+            }
+
+            return View(pagedInvoices);  // Trả về view đầy đủ
         }
+
+
+
+
         [HttpPost]
         public IActionResult ConfirmPayment(int id)
         {

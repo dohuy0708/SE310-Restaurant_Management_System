@@ -20,7 +20,8 @@
 <div class="card">
     <div class="card-body">
         <h4 class="card-title">Đơn đặt bàn</h4>
-        <a asp-action="Booking">Đặt bàn</a>
+        <button type="button" class="btn btn-sm btn-danger mb-2" onclick="location.href='@Url.Action("Booking")'">Đặt bàn</button>
+
         <div class="table-responsive">
             <table class="table table-danger">
                 <thead>
@@ -68,7 +69,7 @@
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Có, hủy đặt bàn!',
+            confirmButtonText: 'Đồng ý',
             cancelButtonText: 'Không'
         }).then((result) => {
             if (result.isConfirmed) {

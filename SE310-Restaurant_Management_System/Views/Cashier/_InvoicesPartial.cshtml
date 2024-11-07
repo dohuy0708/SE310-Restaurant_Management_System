@@ -1,5 +1,6 @@
-﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.Invoice>
-
+﻿@* @model IPagedList<SE310_Restaurant_Management_System.Models.Invoice> *@
+@using X.PagedList.Mvc.Core
+@model X.PagedList.IPagedList<Invoice>
 <div class="table-responsive">
     <table class="table table-danger">
         <thead>
@@ -21,12 +22,13 @@
                     <td>@item.TotalAmount</td>
                     <td>@status</td>
                     <td>
-                        
                         @if (!item.IsPaid)
                         {
                             <button class="btn btn-sm btn-success" onclick="confirmPayment(@item.InvoiceId)">Thanh toán</button>
-                        }else{
-                        <button class="btn btn-sm btn-info" onclick="showInvoiceDetails(@item.InvoiceId)">Xem Chi Tiết</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-info" onclick="showInvoiceDetails(@item.InvoiceId)">Xem Chi Tiết</button>
                         }
                     </td>
                 </tr>
@@ -34,3 +36,12 @@
         </tbody>
     </table>
 </div>
+<div class="pagination-container">
+    @Html.PagedListPager(Model, page => Url.Action("Invoice", new { page, isPaid = ViewData["IsPaid"] }), new PagedListRenderOptions
+{
+    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+    DisplayLinkToNextPage = PagedListDisplayMode.Always
+})
+</div>  
