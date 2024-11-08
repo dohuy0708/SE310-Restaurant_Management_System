@@ -127,7 +127,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Staff
             var currentDateTime = DateTime.Now;
 
             // Format the ID as "yyyyMMddHHmmss" (e.g., 20231103120000 for November 3, 2024, 12:00:00 PM)
-            ViewBag.ID = currentDateTime.ToString("yyyyMMddHHmmss");
+            ViewBag.ID = currentDateTime.ToString("MMddHHmmss");
 
             // Format the Date as "yyyy-MM-dd" (e.g., 2024-11-03)
             ViewBag.Date = currentDateTime.ToString("yyyy-MM-dd");

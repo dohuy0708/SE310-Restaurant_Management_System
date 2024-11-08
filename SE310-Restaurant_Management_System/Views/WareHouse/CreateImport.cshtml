@@ -27,35 +27,35 @@
         </div>
 
         <div class="form-group row">
-            <label class="col-sm-3 col-form-label">Mô tả</label>
-            <div class="col-sm-9">
+            <label class="col-sm-1 col-form-label" style="width:12.5%">Mô tả</label>
+            <div class="col-sm-10" style="width:87.5%">
                 <textarea class="form-control" id="Description" name="Description" rows="2"></textarea>
             </div>
         </div>
 
         <!-- Bảng Danh Sách Nguyên Liệu -->
-        <table class="table table-bordered" id="ingredientTable">
-            <thead>
-                <tr>
-                    <th>Tên Nguyên Liệu</th>
-                    <th>Đơn Vị Tính</th>
-                    <th>Đơn Giá</th>
-                    <th>Số Lượng</th>
-                    <th>Thành Tiền</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Dòng nguyên liệu sẽ được thêm vào đây -->
-            </tbody>
-        </table>
+      <table class="table table-bordered" id="ingredientTable" style="border: 1px solid silver;">
+    <thead style="border-bottom: 2px solid silver;">
+        <tr>
+            <th style="border: 1px solid silver;">Tên Nguyên Liệu</th>
+            <th style="border: 1px solid silver;">Đơn Vị Tính</th>
+            <th style="border: 1px solid silver;">Đơn Giá</th>
+            <th style="border: 1px solid silver;">Số Lượng</th>
+            <th style="border: 1px solid silver;">Thành Tiền</th>
+            <th style="border: 1px solid silver;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Dòng nguyên liệu sẽ được thêm vào đây -->
+    </tbody>
+</table>
 
-        <button type="button" class="btn btn-success mb-3" onclick="addIngredientRow()">Thêm Nguyên Liệu</button>
+        <button style="margin-top: 10px" type="button" class="btn btn-success mb-3" onclick="addIngredientRow()">Thêm Nguyên Liệu</button>
 
         <!-- Tổng tiền -->
         <div class="form-group row">
-            <label class="col-sm-3 col-form-label font-weight-bold">Tổng Tiền</label>
-            <div class="col-sm-9">
+            <label class="col-sm-3 col-form-label font-weight-bold"  style="width:12.5%" >Tổng Tiền</label>
+            <div class="col-sm-9" style="width:87.5%">
                 <input type="text" class="form-control font-weight-bold" id="TotalAmount" readonly style="background-color: #f8f9fa; border-color: #007bff; color: #007bff;">
                 <span style="font-weight: bold; color: #007bff;"> VND</span>
             </div>
