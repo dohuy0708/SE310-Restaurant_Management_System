@@ -1,53 +1,115 @@
 ﻿@using X.PagedList.Mvc.Core
-@using SE310_Restaurant_Management_System.Models
-@model X.PagedList.IPagedList<InventoryEntry>
+@using SE310_Restaurant_Management_System.ViewModels
+@model X.PagedList.IPagedList<InventoryEntryViewModel>
+
 @{
     ViewData["Title"] = "Import";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<h4 class="card-title">ĐƠN NHẬP KHO</h4>
 
- 
-    <h4 class="card-title">ĐƠN NHẬP KHO</h4>
-    <div class="d-flex justify-content-between align-items-center mb-2">
+<!-- Lọc theo ngày -->
+<div class="d-flex justify-content-between mb-3">
+    <!-- Filter by Date -->
+    <!-- Filter by Date -->
+    <form method="get" action="@Url.Action("Import")" class="d-flex align-items-center">
+        <label for="selectedDate" class="me-2" style="width: 80px; font-weight:500">Ngày:</label>
 
-        <!-- Search form on the left -->
-        <form class="d-flex align-items-center h-100" action="#">
-            <div class="input-group">
-                <div class="input-group-prepend bg-transparent">
-                    <i class="input-group-text border-0 mdi mdi-magnify"></i>
-                </div>
-                <!-- Input with border and custom width -->
-                <input type="text" class="form-control border rounded" style="width: 400px;" placeholder="Tìm kiếm">
-            </div>
-        </form>
-        <div>
-            <button type="button" class="btn btn-primary btn-md">Nhập Kho</button>
-           
-        </div>
-    </div>
+        <!-- Input with custom height to match the button -->
+        <input type="date" id="selectedDate" name="selectedDate"
+               class="form-control me-2"
+               value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")"
+               style="height: 34px;"> <!-- Adjust height as needed -->
+
+        <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
+    </form>
+
+    <button type="button" class="btn btn-primary btn-md">Nhập Kho</button>
+</div>
+
 <table class="table table-hover table-striped" style="position:relative">
-        <thead>
-            <tr>
-                <th>Mã Đơn</th>
-                <th>Ngày Nhập</th>
-                <th>Mô tả</th>
-                <th>Tổng Tiền</th>
-            </tr>
-        </thead>
-        @foreach (var item in Model)
+    <thead>
+        <tr>
+            <th>Mã Đơn</th>
+            <th>Ngày Nhập</th>
+            <th>Mô tả</th>
+            <th>Tổng Tiền</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model)
         {
             <tr>
-                <td>@item.EntryId</td>
-                <td>@item.EntryDate</td>
-                <td>@item.Description </td>
-                <td>@item.TotalPrice</td>
-                 
+                <td>@entry.EntryId</td>
+                <td>@entry.EntryDate.ToShortDateString()</td>
+                <td>@entry.Description</td>
+                <td>@entry.TotalPrice</td>
+                <td>
+                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#viewModal-@entry.EntryId">
+                        <i class="mdi mdi-eye"></i>
+                    </button>
+                </td>
             </tr>
         }
-    </table>
-<div style="position:fixed; top:600px">
-    @Html.PagedListPager(Model, page => Url.Action("Import", new { page = page }), new PagedListRenderOptions()
+    </tbody>
+</table>
+
+@foreach (var entry in Model)
+{
+    <div class="modal fade" id="viewModal-@entry.EntryId" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel-@entry.EntryId" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title text-center w-100" id="viewModalLabel-@entry.EntryId">THÔNG TIN ĐƠN NHẬP KHO</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Mã Đơn:</strong> @entry.EntryId</p>
+                    <p><strong>Ngày Nhập:</strong> @entry.EntryDate.ToShortDateString()</p>
+                    <p><strong>Mô tả:</strong> @entry.Description</p>
+                    <p><strong>Tổng Tiền:</strong> @entry.TotalPrice</p>
+
+                    <h6>Chi Tiết Đơn Hàng:</h6>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                 
+                                <th>Mã Nguyên Liệu</th>
+                                <th>Tên Nguyên Liệu</th> <!-- Added IngredientName column -->
+                                <th>Đơn Vị</th>
+                                <th>Số Lượng</th>
+                                <th>Giá Nhập</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in entry.EntryDetails)
+                            {
+                                <tr>
+                                     
+                                    <td>@detail.IngredientId</td>
+                                    <td>@detail.IngredientName</td> <!-- Display IngredientName here -->
+                                    <td>@detail.Unit</td>
+                                    <td>@detail.Quantity</td>
+                                    <td>@detail.ImportPrice</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div style="position:fixed; top:650px">
+    @Html.PagedListPager(Model, page => Url.Action("Import", new { page = page, selectedDate = ViewBag.SelectedDate }), new PagedListRenderOptions()
 {
     LiElementClasses = new List<String> { "page-item" },
     PageClasses = new List<String> { "page-link" }

@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SE310_Restaurant_Management_System.Models;
 
 namespace SE310_Restaurant_Management_System.Controllers
 {
     public class HomeController : Controller
     {
-        QlnhaHangContext db = new QlnhaHangContext();
+       QlnhaHangContext db = new QlnhaHangContext();
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)
@@ -22,12 +23,8 @@ namespace SE310_Restaurant_Management_System.Controllers
 
         
 
-      
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    
+       
 
     }
 }

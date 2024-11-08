@@ -16319,7 +16319,7 @@ input:focus {
 /* Typography */
 body {
     font-size: 1rem;
-    font-family: "ubuntu-regular", sans-serif;
+    font-family: "Segoe UI", sans-serif;
     font-weight: initial;
     line-height: normal;
     -webkit-font-smoothing: antialiased;
@@ -16343,7 +16343,8 @@ h6,
 .h4,
 .h5,
 .h6 {
-    font-family: "ubuntu-medium", sans-serif;
+    font-family: "Segoe UI", sans-serif;
+    font-weight:  500;
 }
 
 p {
