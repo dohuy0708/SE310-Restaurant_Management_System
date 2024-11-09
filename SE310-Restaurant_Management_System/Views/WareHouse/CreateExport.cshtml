@@ -160,7 +160,12 @@
 
     function submitOrder() {
         if (!validateForm()) {
-            alert("Vui lòng điền đầy đủ thông tin cho tất cả các nguyên liệu.");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý!',
+                text: "Vui lòng nhập đầy đủ thông tin "
+              
+            })
             return;
         }
 
@@ -198,12 +203,26 @@
             data: JSON.stringify(data),
             contentType: 'application/json',
             success: function (response) {
-                alert("Đơn xuất kho đã được tạo thành công.");
-                window.location.href = '@Url.Action("Export", "WareHouse")';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Xuất kho thành công!',
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(() => {
+                            window.location.href = '@Url.Action("Export", "WareHouse")';
+                })
+             
+              
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.error("AJAX error:", jqXHR);
-                alert("Đã xảy ra lỗi khi tạo đơn nhập kho: " + errorThrown);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi !',
+                    text: "Lỗi: "+ errorThrown,
+                    showConfirmButton: true,
+                     
+                })
             }
         });
 
