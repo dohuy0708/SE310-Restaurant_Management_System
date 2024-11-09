@@ -56,7 +56,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             // Thêm mục "Tất cả" vào đầu danh sách
             subCategories.Insert(0, new SubCategory
             {
-                SubCategoryId = 0, // Đặt ID đặc biệt, ví dụ là 0, để đại diện cho "Tất cả"
+                SubCategoryId = 0, 
                 SubCategoryName = "Tất cả"
             });
             ViewBag.SubCategories = subCategories;
@@ -87,11 +87,11 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
                 return PartialView("_MenuItemsPartial", menuItems.ToList());
         }
 
-        public IActionResult BookingOrder()
-        {
-            var orders = db.BookingOrders.AsNoTracking().ToList();
-            return View(orders);
-        }
+            public IActionResult BookingOrder()
+            {
+                var orders = db.BookingOrders.AsNoTracking().ToList();
+                return View(orders);
+            }
         [HttpGet]
         public IActionResult Booking(int? tableId)
         {           

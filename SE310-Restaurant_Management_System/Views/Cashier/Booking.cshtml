@@ -2,10 +2,10 @@
 
 <div class="card">
     <div class="card-body">
-        <h4 class="card-title">Booking Form</h4>
+        <h4 class="card-title">Đặt bàn</h4>
         <form class="forms-sample" asp-action="Booking">
             <div class="form-group row">
-                <label asp-for="CustomerName" class="col-sm-3 col-form-label">Customer Name</label>
+                <label asp-for="CustomerName" class="col-sm-3 col-form-label">Tên khách hàng</label>
                 <div class="col-sm-9">
                     <input asp-for="CustomerName" class="form-control" />
                     <span asp-validation-for="CustomerName" class="text-danger"></span>
@@ -13,7 +13,7 @@
             </div>
 
             <div class="form-group row">
-                <label asp-for="CustomerPhone" class="col-sm-3 col-form-label">Customer Phone</label>
+                <label asp-for="CustomerPhone" class="col-sm-3 col-form-label">SĐT</label>
                 <div class="col-sm-9">
                     <input asp-for="CustomerPhone" class="form-control" />
                     <span asp-validation-for="CustomerPhone" class="text-danger"></span>
@@ -21,7 +21,7 @@
             </div>
 
             <div class="form-group row">
-                <label asp-for="BookingTime" class="col-sm-3 col-form-label">Booking Time</label>
+                <label asp-for="BookingTime" class="col-sm-3 col-form-label">Thời gian</label>
                 <div class="col-sm-9">
                     <input asp-for="BookingTime" class="form-control" />
                     <span asp-validation-for="BookingTime" class="text-danger"></span>
@@ -29,7 +29,7 @@
             </div>
 
             <div class="form-group row">
-                <label asp-for="NumberOfPeople" class="col-sm-3 col-form-label">Number of People</label>
+                <label asp-for="NumberOfPeople" class="col-sm-3 col-form-label">Số người</label>
                 <div class="col-sm-9">
                     <input asp-for="NumberOfPeople" class="form-control" />
                     <span asp-validation-for="NumberOfPeople" class="text-danger"></span>
@@ -37,7 +37,7 @@
             </div>
 
             <div class="form-group row">
-                <label asp-for="DepositAmount" class="col-sm-3 col-form-label">Deposit Amount</label>
+                <label asp-for="DepositAmount" class="col-sm-3 col-form-label">Tiền cọc</label>
                 <div class="col-sm-9">
                     <input asp-for="DepositAmount" class="form-control" />
                     <span asp-validation-for="DepositAmount" class="text-danger"></span>
@@ -46,10 +46,10 @@
 
             <!-- Dropdown List for Tables -->
             <div class="form-group row">
-                <label asp-for="TableId" class="col-sm-3 col-form-label">Table</label>
+                <label asp-for="TableId" class="col-sm-3 col-form-label">Bàn</label>
                 <div class="col-sm-9">
                     <select asp-for="TableId" class="form-control" style="color:black; font-size:medium">
-                        <option value="">-- Select a Table --</option>
+                        <option value="">-- Chọn bàn --</option>
                         @foreach (var table in (ViewBag.Tables as List<RestaurantTable>))
                         {
                             if (table.TableId == ViewBag.SelectedTableId)
