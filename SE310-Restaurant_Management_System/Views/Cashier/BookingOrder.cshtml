@@ -1,0 +1,82 @@
+﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.BookingOrder>
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: '',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    </script>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Đơn đặt bàn</h4>
+        <button type="button" class="btn btn-sm btn-danger mb-2" onclick="location.href='@Url.Action("Booking")'">Đặt bàn</button>
+
+        <div class="table-responsive">
+            <table class="table table-danger">
+                <thead>
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>SĐT</th>
+                        <th>Thời gian</th>
+                        <th>Số người</th>
+                        <th>Tiền cọc</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="table-warning">
+                            <td>@item.CustomerName</td>
+                            <td>@item.CustomerPhone</td>
+                            <td>@item.BookingTime</td>
+                            <td>@item.NumberOfPeople</td>
+                            <td>@item.DepositAmount đ</td>
+                            <td>
+                                <!-- Form hủy đặt bàn -->
+                              
+                                <form id="cancelBookingForm-@item.BookingOrderId" asp-action="CancelBooking" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="bookingOrderId" value="@item.BookingOrderId" />
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmCancelBooking(@item.BookingOrderId)">Hủy</button>
+                                </form>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    function confirmCancelBooking(bookingOrderId) {
+        Swal.fire({
+            title: 'Bạn có chắc chắn muốn hủy đặt bàn?',
+            text: "Hành động này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tìm form theo id và submit
+                document.getElementById(`cancelBookingForm-${bookingOrderId}`).submit();
+            }
+        });
+    }
+
+</script>
