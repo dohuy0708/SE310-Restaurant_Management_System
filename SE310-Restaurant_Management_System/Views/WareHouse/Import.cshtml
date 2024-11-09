@@ -25,7 +25,7 @@
         <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
     </form>
 
-    <button type="button" class="btn btn-primary btn-md">Nhập Kho</button>
+    <button type="button" class="btn btn-primary btn-md" onclick="location.href='@Url.Action("CreateImport", "WareHouse")'">Nhập Kho</button>
 </div>
 
 <table class="table table-hover table-striped" style="position:relative">
@@ -47,8 +47,8 @@
                 <td>@entry.Description</td>
                 <td>@entry.TotalPrice</td>
                 <td>
-                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#viewModal-@entry.EntryId">
-                        <i class="mdi mdi-eye"></i>
+                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#viewModal-@entry.EntryId">
+                      Xem chi tiết
                     </button>
                 </td>
             </tr>
@@ -74,15 +74,15 @@
                     <p><strong>Tổng Tiền:</strong> @entry.TotalPrice</p>
 
                     <h6>Chi Tiết Đơn Hàng:</h6>
-                    <table class="table table-bordered">
-                        <thead>
+                    <table class="table table-bordered" style="border: 1px solid silver;">
+                        <thead style="border-bottom: 2px solid silver;">
                             <tr>
-                                 
-                                <th>Mã Nguyên Liệu</th>
-                                <th>Tên Nguyên Liệu</th> <!-- Added IngredientName column -->
-                                <th>Đơn Vị</th>
-                                <th>Số Lượng</th>
-                                <th>Giá Nhập</th>
+
+                                <th style="border: 1px solid silver;">Mã Nguyên Liệu</th>
+                                <th style="border: 1px solid silver;"> Tên Nguyên Liệu</th> <!-- Added IngredientName column -->
+                                <th style="border: 1px solid silver;">Đơn Vị</th>
+                                <th style="border: 1px solid silver;">Số Lượng</th>
+                                <th style="border: 1px solid silver;">Giá Nhập</th>
                             </tr>
                         </thead>
                         <tbody>

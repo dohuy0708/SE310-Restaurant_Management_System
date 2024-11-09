@@ -96,13 +96,18 @@
                     </td>
                     <td><input type="text" class="form-control unit" readonly></td>
                     <td><input type="number" class="form-control price" placeholder="Đơn giá" required onchange="calculateTotal(this)"></td>
-                    <td><input type="number" class="form-control quantity" placeholder="Số lượng" required onchange="calculateTotal(this)"></td>
+                        <td><input type="number" class="form-control quantity" placeholder="Số lượng"   required min="1" oninput="checkQuantity(this)" onchange="calculateTotal(this)"></td>
                     <td><input type="text" class="form-control total" readonly></td>
                     <td><button type="button" class="btn btn-danger" onclick="removeIngredientRow(this)">Xóa</button></td>
                 </tr>`;
             $('#ingredientTable tbody').append(newRow);
         }
-
+    function checkQuantity(input) {
+        if (input.value < 1) {
+            alert("Số lượng phải là số dương và lớn hơn 0.");
+            input.value = 1; // Đặt lại giá trị về 1 nếu nhập giá trị không hợp lệ
+        }
+    }
     function updateUnit(select) {
         const unit = $(select).find('option:selected').data('unit');
         $(select).closest('tr').find('.unit').val(unit);
@@ -159,7 +164,6 @@
             if (ingredientId && importPrice && quantity) {
                 entryDetails.push({
                     IngredientId: parseInt(ingredientId),
-                    IngredientName:"",
                     Unit: unit,
                     Quantity: quantity,
                     ImportPrice: importPrice
@@ -167,29 +171,35 @@
             }
         });
 
-        const data = {
-            EntryId: parseInt($('#OrderCode').val()),
-            EntryDate: $('#OrderDate').val(), // Thêm ngày nhập
-            Description: $('#Description').val(),
-            TotalPrice: 1000.00,
-            EntryDetails: entryDetails
-        };
-        console.log("Data to action", data);
+       
+ 
+const data = {
+    EntryId:  parseInt($('#OrderCode').val()),  // Example entry ID
+    EntryDate: "2024-11-08",  // Example date (use a valid date string)
+    Description:  $('#Description').val(),  // Example description
+    TotalPrice: 1000.00,  // Calculate total price based on EntryDetails
+    EntryDetails: entryDetails
+};
 
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("CreateImport", "WareHouse")',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function (response) {
-                alert("Đơn nhập kho đã được tạo thành công.");
-                window.location.href = '@Url.Action("Import", "WareHouse")';
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error("AJAX error:", jqXHR);
-                alert("Đã xảy ra lỗi khi tạo đơn nhập kho: " + errorThrown);
-            }
-        });
+console.log("Data to action", data);
+
+$.ajax({
+    type: 'POST',
+    url: '@Url.Action("CreateImport", "WareHouse")',
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    success: function (response) {
+        alert("Đơn nhập kho đã được tạo thành công.");
+        window.location.href = '@Url.Action("Import", "WareHouse")';
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+        console.error("AJAX error:", jqXHR);
+        alert("Đã xảy ra lỗi khi tạo đơn nhập kho: " + errorThrown);
+    }
+});
+
+
+
     }
 
     function goBack() {

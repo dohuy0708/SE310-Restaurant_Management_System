@@ -1,18 +1,18 @@
-﻿
+﻿@model IEnumerable<Ingredient>
 @{
-    ViewData["Title"] = "CreateExport";
+    ViewData["Title"] = "CreateImport";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="card-body">
-    <h4 class="card-title">ĐƠN XUẤT KHO </h4>
+    <h4 class="card-title">ĐƠN XUẤT KHO</h4>
     <form class="form-sample" id="purchaseOrderForm">
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Mã đơn</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="OrderCode" readonly value="@ViewBag.ID">
+                        <input type="text" class="form-control" id="OrderCode" name="OrderCode" readonly value="@ViewBag.ID">
                     </div>
                 </div>
             </div>
@@ -20,28 +20,37 @@
                 <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Ngày Nhập</label>
                     <div class="col-sm-9">
-                        <input type="date" class="form-control" id="OrderDate" value="{@ViewBag.Date}" readonly>
+                        <input type="date" class="form-control" id="OrderDate" name="OrderDate" readonly value="@ViewBag.Date">
                     </div>
                 </div>
             </div>
         </div>
-        <div class="form-group row">
-            <label class="col-sm-3 col-form-label">Mô tả</label>
-            <div class="col-sm-9">
-                <textarea class="form-control" id="Description" rows="2" style="width: 100%;"></textarea>
+        
+            <div class="form-group row">
+                <label class="col-sm-1 col-form-label" style="width:12.5%">Người Nhận </label>
+                <div class="col-sm-10" style="width:87.5%">
+                <textarea class="form-control" id="RecipientName" name="RecipientName" rows="1"></textarea>
+                </div>
             </div>
-        </div>
+            <div class="form-group row">
+                <label class="col-sm-1 col-form-label" style="width:12.5%">Mô tả</label>
+            <div class="col-sm-10" style="width:87.5%">
+                    <textarea class="form-control" id="Description" name="Description" rows="2"></textarea>
+                </div>
+            </div>
+
+       
 
         <!-- Bảng Danh Sách Nguyên Liệu -->
-        <table class="table table-bordered" id="ingredientTable">
-            <thead>
+        <table class="table table-bordered" id="ingredientTable" style="border: 1px solid silver;">
+            <thead style="border-bottom: 2px solid silver;">
                 <tr>
-                    <th>Tên Nguyên Liệu</th>
-                    <th>Đơn Vị Tính</th>
-                    <th>Đơn Giá</th>
-                    <th>Số Lượng</th>
-                    <th>Thành Tiền</th>
-                    <th></th>
+                    <th style="border: 1px solid silver;">Tên Nguyên Liệu</th>
+                    <th style="border: 1px solid silver;">Đơn Vị Tính</th>
+               
+                    <th style="border: 1px solid silver;">Số Lượng</th>
+                  
+                    <th style="border: 1px solid silver;"></th>
                 </tr>
             </thead>
             <tbody>
@@ -49,96 +58,160 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success mb-3" onclick="addIngredientRow()" style="font-size: 14px; padding: 5px 10px;">Thêm Nguyên Liệu</button>
+        <button style="margin-top: 10px" type="button" class="btn btn-success mb-3" onclick="addIngredientRow()">Thêm Nguyên Liệu</button>
 
         <!-- Tổng tiền -->
         <div class="form-group row">
-            <label class="col-sm-3 col-form-label font-weight-bold" style="font-size: 16px;">Tổng Tiền</label>
-            <div class="col-sm-9">
-                <input type="text" class="form-control font-weight-bold" id="TotalAmount" readonly style="background-color: #f8f9fa; border-color: #007bff; font-size: 16px; color: #007bff;">
-                <span style="font-weight: bold; color: #007bff;"> VND</span>
+            <label class="col-sm-3 col-form-label font-weight-bold" style="width:12.5%">Tổng số</label>
+            <div class="col-sm-9" style="width:87.5%">
+                <input type="text" class="form-control font-weight-bold" id="TotalAmount" readonly style="background-color: #f8f9fa; border-color: #007bff; color: #007bff;">
+                
             </div>
         </div>
 
         <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-primary" onclick="submitOrder()">Tạo Đơn</button>
             <button type="button" class="btn btn-secondary" onclick="goBack()">Quay Lại</button>
+            <button type="button" class="btn btn-primary" onclick="submitOrder()">Xuất kho</button>
         </div>
     </form>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Mock data for ingredients
-    const ingredients = [
-        { id: 1, name: 'Gạo', unit: 'Kg', price: 20000 },
-        { id: 2, name: 'Đường', unit: 'Kg', price: 15000 },
-        { id: 3, name: 'Muối', unit: 'Kg', price: 5000 },
-        { id: 4, name: 'Dầu ăn', unit: 'Lít', price: 40000 },
-        { id: 5, name: 'Thịt gà', unit: 'Kg', price: 80000 },
-    ];
+    const ingredients = [];
 
-    function addIngredientRow() {
-        let newRow = `
-            <tr>
-                <td>
-                    <select class="form-control ingredient-select" onchange="updateUnitPrice(this)" style="width: 100%;">
-                        <option value="">Chọn nguyên liệu</option>
-                        ${ingredients.map(ingredient => `
-                            <option value="${ingredient.id}" data-unit="${ingredient.unit}" data-price="${ingredient.price}">
-                                ${ingredient.name}
-                            </option>
-                        `).join('')}
-                    </select>
-                </td>
-                <td><input type="text" class="form-control unit" readonly style="width: 70px;"></td>
-                <td><input type="number" class="form-control price" onchange="calculateTotal(this)" placeholder="Đơn giá" required></td>
-                <td><input type="number" class="form-control quantity" onchange="calculateTotal(this)" placeholder="Số lượng" required></td>
-                <td><input type="text" class="form-control total" readonly></td>
-                <td><button type="button" class="btn btn-danger" onclick="removeIngredientRow(this)" style="font-size: 12px; padding: 2px 5px;">Xóa</button></td>
-            </tr>`;
-        $('#ingredientTable tbody').append(newRow);
+    @foreach (var ingredient in Model)
+    {
+        <text>
+                ingredients.push({
+                    id: @ingredient.IngredientId,
+                name: '@ingredient.IngredientName',
+                unit: '@ingredient.Unit'
+                                });
+        </text>
     }
 
-    function updateUnitPrice(select) {
-        const selectedOption = $(select).find('option:selected');
-        const unit = selectedOption.data('unit');
-        const price = selectedOption.data('price');
+        function addIngredientRow() {
+            const newRow = `
+                    <tr>
+                        <td>
+                            <select class="form-control ingredient-select" onchange="updateUnit(this)">
+                                <option value="">Chọn nguyên liệu</option>
+                                ${ingredients.map(ingredient => `
+                                    <option value="${ingredient.id}" data-unit="${ingredient.unit}">${ingredient.name}</option>
+                                `).join('')}
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-control unit" readonly></td>
+                            <td><input type="number" class="form-control quantity" placeholder="Số lượng"  required min="1" oninput="checkQuantity(this)" required onchange="calculateTotal(this)"></td>
+                  
+                        <td><button type="button" class="btn btn-danger" onclick="removeIngredientRow(this)">Xóa</button></td>
+                    </tr>`;
+            $('#ingredientTable tbody').append(newRow);
+        }
 
+    function checkQuantity(input) {
+        if (input.value < 1) {
+            alert("Số lượng phải là số dương và lớn hơn 0.");
+            input.value = 1; // Đặt lại giá trị về 1 nếu nhập giá trị không hợp lệ
+        }
+    }
+    function updateUnit(select) {
+        const unit = $(select).find('option:selected').data('unit');
         $(select).closest('tr').find('.unit').val(unit);
-        $(select).closest('tr').find('.price').val(price);
-        calculateTotal($(select).closest('tr').find('.quantity'));
     }
 
+    // Hàm tính tổng số lượng của nguyên liệu
     function calculateTotal(element) {
         const row = $(element).closest('tr');
-        const price = parseFloat(row.find('.price').val()) || 0;
         const quantity = parseFloat(row.find('.quantity').val()) || 0;
-        const total = price * quantity;
-
-        row.find('.total').val(total);
+        row.find('.total').val(quantity);  // Hiển thị số lượng vào ô "Total" (bạn có thể không cần trường này nữa)
         updateGrandTotal();
     }
 
+    // Hàm tính tổng số lượng của tất cả nguyên liệu
     function updateGrandTotal() {
         let grandTotal = 0;
-        $('#ingredientTable .total').each(function() {
+        $('#ingredientTable .quantity').each(function () {
             grandTotal += parseFloat($(this).val()) || 0;
         });
-        $('#TotalAmount').val(grandTotal);
+        $('#TotalAmount').val(grandTotal);  // Hiển thị tổng số lượng vào ô "Tổng số"
     }
+
 
     function removeIngredientRow(button) {
         $(button).closest('tr').remove();
         updateGrandTotal();
     }
 
+    function validateForm() {
+        let valid = true;
+        $('#ingredientTable tbody tr').each(function () {
+            const ingredientSelect = $(this).find('.ingredient-select').val();
+ 
+            const quantity = $(this).find('.quantity').val();
+            if (!ingredientSelect || !quantity) {
+                valid = false;
+                return false; // Break the loop
+            }
+        });
+        return valid;
+    }
+
     function submitOrder() {
-        // Logic for submitting the order
-        alert("Đơn nhập kho đã được tạo!");
+        if (!validateForm()) {
+            alert("Vui lòng điền đầy đủ thông tin cho tất cả các nguyên liệu.");
+            return;
+        }
+
+         
+        const exitDetails = [];
+
+        // Thu thập dữ liệu từ bảng
+        $('#ingredientTable tbody tr').each(function () {
+            const ingredientId = $(this).find('.ingredient-select').val();  // Lấy IngredientId từ ô select
+            const unit = $(this).find('.unit').val();  // Lấy đơn vị
+            const quantity = $(this).find('.quantity').val();  // Lấy số lượng
+
+            // Kiểm tra nếu nguyên liệu và số lượng hợp lệ
+            if (ingredientId && quantity > 0) {
+                exitDetails.push({
+                    IngredientId: ingredientId,
+                    Unit: unit,
+                    Quantity: quantity
+                });
+            }
+        });
+
+        // Dữ liệu cho đơn xuất kho
+        const data = {
+            ExitId: $('#OrderCode').val(),
+            ExitDate: "2024-11-08",
+            RecipientName: $('#RecipientName').val(),
+            Description: $('#Description').val(),
+            ExitDetails: exitDetails
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("CreateExport", "WareHouse")',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (response) {
+                alert("Đơn xuất kho đã được tạo thành công.");
+                window.location.href = '@Url.Action("Export", "WareHouse")';
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("AJAX error:", jqXHR);
+                alert("Đã xảy ra lỗi khi tạo đơn nhập kho: " + errorThrown);
+            }
+        });
+
+
+
     }
 
     function goBack() {
-        // Logic for going back, e.g., redirecting to the previous page
         window.history.back();
     }
 </script>
