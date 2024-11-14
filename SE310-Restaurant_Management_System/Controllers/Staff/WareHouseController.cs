@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using X.PagedList;
 namespace SE310_Restaurant_Management_System.Controllers.Staff
 {
     [Route("WareHouse")]
+    [Authorize(Roles ="Staff")]
     public class WareHouseController : Controller
     {
         QlnhaHangContext db = new QlnhaHangContext();

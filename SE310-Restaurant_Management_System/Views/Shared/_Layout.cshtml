@@ -110,21 +110,19 @@
                         </a>
                     </li>
                     <!-- Điều kiện hiển thị sidebar theo vai trò người dùng -->
-                    @Html.Partial("_StaffSidebar")
-
-                    @*       @if (User.IsInRole("Admin"))
+                    @* Kiểm tra vai trò của người dùng và hiển thị sidebar tương ứng *@
+                    @if (User.IsInRole("Admin"))
                     {
-                    @Html.Partial("_AdminSidebar")
+                        @Html.Partial("_AdminSidebar")
                     }
                     else if (User.IsInRole("Cashier"))
                     {
-                    @Html.Partial("_CashierSidebar")
+                        @Html.Partial("_CashierSidebar")
                     }
-                    else if(User.IsInRole("Staff"))
+                    else if (User.IsInRole("Staff"))
                     {
-                    @Html.Partial("_StaffSidebar")
-                    } *@
-                     
+                        @Html.Partial("_StaffSidebar")
+                    }
 
 
                 </ul>
