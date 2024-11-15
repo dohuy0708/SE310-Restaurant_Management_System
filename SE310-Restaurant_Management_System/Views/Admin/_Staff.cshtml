@@ -1,12 +1,5 @@
-﻿@{
-    ViewData["Title"] = "QuanLyNhanVien";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-@using SE310_Restaurant_Management_System.Models;
-@using X.PagedList.Mvc.Core
+﻿@using X.PagedList.Mvc.Core
 @model X.PagedList.IPagedList<User>
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 <h1>QuanLyNhanVien</h1>
 
@@ -43,8 +36,8 @@
     </tbody>
 </table>
 
-<div class="page-list" style="position:fixed; top:660px; height:100px" >
-    @Html.PagedListPager(Model, page => Url.Action("QuanLyNhanVien", new { page = page }), new PagedListRenderOptions()
+<div class="page-list" style="position:fixed; top:660px; height:100px">
+    @Html.PagedListPager(Model, page => Url.Action("Staff", new { page = page }), new PagedListRenderOptions()
 {
     LiElementClasses = new List<String> { "page-item" },
     PageClasses = new List<String> { "page-link" }
