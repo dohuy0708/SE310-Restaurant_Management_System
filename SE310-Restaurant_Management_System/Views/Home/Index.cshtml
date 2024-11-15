@@ -1,8 +1,12 @@
-﻿
+﻿@model IEnumerable<MenuItem>
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
-
+@foreach (var item in Model)
+{
+    <form asp-action="Logout" asp-controller="Login" method="post">
+        <button type="submit" class="btn btn-primary">Log Out</button>
+    </form>
+}

@@ -1,24 +1,25 @@
 ﻿<!-- _CashierSidebar.cshtml -->
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 <li class="nav-item">
-    <a class="nav-link" asp-action="MenuItem">
+    <a class="nav-link" asp-controller="Cashier" asp-action="MenuItem">
         <span class="menu-title">Menu</span>
         <i class="mdi mdi-menu menu-icon"></i>
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" asp-action="Tables">
+    <a class="nav-link" asp-controller="Cashier" asp-action="Tables">
         <span class="menu-title">Bàn</span>
         <i class="mdi mdi-silverware menu-icon"></i>
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" asp-action="BookingOrder">
+    <a class="nav-link" asp-controller="Cashier" asp-action="BookingOrder">
         <span class="menu-title">Đơn đặt</span>
         <i class="mdi mdi-cellphone-android menu-icon"></i>
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" asp-action="Invoice">
+    <a class="nav-link" v asp-action="Invoice">
         <span class="menu-title">Hóa đơn</span>
         <i class="mdi mdi-receipt menu-icon"></i>
     </a>

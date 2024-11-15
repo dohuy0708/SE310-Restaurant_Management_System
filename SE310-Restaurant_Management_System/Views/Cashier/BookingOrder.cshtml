@@ -1,6 +1,8 @@
 ﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.BookingOrder>
 @{
     var successMessage = TempData["SuccessMessage"] as string;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
 }
 
 @if (!string.IsNullOrEmpty(successMessage))

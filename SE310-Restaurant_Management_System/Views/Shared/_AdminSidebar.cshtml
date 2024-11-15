@@ -1,19 +1,57 @@
 ﻿<!-- _AdminSidebar.cshtml -->
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 <li class="nav-item">
-    <a class="nav-link" href="/Admin/Staff">
-        <span class="menu-title">Quản lý nhân viên</span>
-        <i class="mdi mdi-account-multiple menu-icon"></i>
+    <a class="nav-link" asp-controller="Admin" asp-action="Statistic">
+        <span class="menu-title">Thống kê</span>
+        <i class="mdi mdi-chart-bar menu-icon"></i>
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" href="/Admin/MenuItem">
+    <a class="nav-link" asp-controller="Admin" asp-action="MenuItem">
         <span class="menu-title">Quản lý món ăn</span>
         <i class="mdi mdi-food menu-icon"></i>
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link" href="/Admin/Report">
-        <span class="menu-title">Báo cáo</span>
+    <a class="nav-link" asp-controller="Admin" asp-action="Combo">
+        <span class="menu-title">Quản lý thực đơn</span>
         <i class="mdi mdi-file-chart menu-icon"></i>
     </a>
 </li>
+<li class="nav-item">
+    <a class="nav-link" asp-controller="Admin" asp-action="Staff">
+        <span class="menu-title">Quản lý nhân viên</span>
+        <i class="mdi mdi-account-multiple menu-icon"></i>
+    </a>
+</li>
+
+<script>
+    function loadContent(event, link) {
+        event.preventDefault(); // Ngăn không cho trình duyệt tải lại trang
+        const url = link.getAttribute('href');
+
+        // Lấy phần tử mà bạn muốn thay thế nội dung
+        const contentDiv = document.querySelector('#admin-content');
+        if (!contentDiv) {
+            console.error('Không tìm thấy phần tử #admin-content để thay thế nội dung.');
+            return;
+        }
+
+        // Gọi AJAX để lấy nội dung
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }) // Đảm bảo yêu cầu AJAX
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Lỗi khi tải nội dung');
+                }
+                return response.text(); // Lấy HTML từ phản hồi
+            })
+            .then(html => {
+                contentDiv.innerHTML = html; // Thay thế nội dung
+            })
+            .catch(error => {
+                console.error(error);
+                contentDiv.innerHTML = '<p>Lỗi: Không thể tải nội dung.</p>';
+            });
+    }
+</script>
+

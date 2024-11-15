@@ -1,8 +1,115 @@
-﻿
+﻿@using X.PagedList.Mvc.Core
+@using SE310_Restaurant_Management_System.ViewModels
+@model X.PagedList.IPagedList<InventoryExitViewModel>
+
 @{
-    ViewData["Title"] = "Export";
+    ViewData["Title"] = "Inventory Export";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Export</h1>
+<h4 class="card-title">ĐƠN XUẤT KHO</h4>
+<!-- Lọc theo ngày -->
+<div class="d-flex justify-content-between mb-3">
+    <form method="get" action="@Url.Action("Export")" class="d-flex align-items-center">
+        <label for="selectedDate" class="me-2" style="width: 80px; font-weight:500">Ngày:</label>
 
+        <!-- Input with custom height to match the button -->
+        <input type="date" id="selectedDate" name="selectedDate"
+               class="form-control me-2"
+               value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")"
+               style="height: 34px;"> <!-- Adjust height as needed -->
+
+        <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
+    </form>
+
+    <button type="button" class="btn btn-primary btn-md" onclick="location.href='@Url.Action("CreateExport", "WareHouse")'">Xuất Kho</button>
+</div>
+
+
+ 
+
+<table class="table table-hover table-striped" style="position:relative">
+    <thead>
+        <tr>
+            <th>Mã Đơn</th>
+            <th>Ngày Xuất</th>
+            <th>Người Nhận</th>
+            <th>Mô tả</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var exit in Model)
+        {
+            <tr>
+                <td>@exit.ExitId</td>
+                <td>@exit.ExitDate.ToShortDateString()</td>
+                <td>@exit.RecipientName</td>
+                <td>@exit.Description</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#viewModal-@exit.ExitId">
+                        Xem chi tiết 
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@foreach (var exit in Model)
+{
+    <div class="modal fade" id="viewModal-@exit.ExitId" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel-@exit.ExitId" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title text-center w-100" id="viewModalLabel-@exit.ExitId">THÔNG TIN ĐƠN XUẤT KHO</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Mã Đơn:</strong> @exit.ExitId</p>
+                    <p><strong>Ngày Xuất:</strong> @exit.ExitDate.ToShortDateString()</p>
+                    <p><strong>Người Nhận:</strong> @exit.RecipientName</p>
+                    <p><strong>Mô tả:</strong> @exit.Description</p>
+
+                    <h6>Chi Tiết Đơn Xuất:</h6>
+                    <table class="table table-bordered" style="border: 1px solid silver;">
+                        <thead style="border-bottom: 2px solid silver;">
+                            <tr>
+
+                                <th style="border: 1px solid silver;">Mã Nguyên Liệu</th>
+                                <th style="border: 1px solid silver;">Tên Nguyên Liệu</th> <!-- Added column for Ingredient Name -->
+                                <th style="border: 1px solid silver;">Đơn Vị</th>
+                                <th style="border: 1px solid silver;"> Số Lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in exit.ExitDetails)
+                            {
+                                <tr>
+                                   
+                                    <td>@detail.IngredientId</td>
+                                    <td>@detail.IngredientName</td> <!-- Display IngredientName -->
+                                    <td>@detail.Unit</td>
+                                    <td>@detail.Quantity</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div style="position:fixed; top:650px">
+    @Html.PagedListPager(Model, page => Url.Action("Export", new { page = page }), new PagedListRenderOptions()
+{
+    LiElementClasses = new List<String> { "page-item" },
+    PageClasses = new List<String> { "page-link" }
+})
+</div>

@@ -14,7 +14,7 @@
           href="../../assets/vendors/css/vendor.bundle.base.css" />
     <!-- endinject -->
     <!-- sweetalert2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Layout styles -->
@@ -166,28 +166,26 @@
                         </a>
                     </li>
                     <!-- Điều kiện hiển thị sidebar theo vai trò người dùng -->
-                    @Html.Partial("_CashierSidebar")
 
-                    @*       @if (User.IsInRole("Admin"))
+                           @if (User.IsInRole("Admin"))
                     {
-                    @Html.Partial("_AdminSidebar")
+                        @Html.Partial("_AdminSidebar")
                     }
                     else if (User.IsInRole("Cashier"))
                     {
-                    @Html.Partial("_CashierSidebar")
+                        @Html.Partial("_CashierSidebar")
                     }
-                    else if(User.IsInRole("Staff"))
+                    else if (User.IsInRole("Staff"))
                     {
-                    @Html.Partial("_StaffSidebar")
-                    } *@
-                     
+                        @Html.Partial("_StaffSidebar")
+                    }
 
 
                 </ul>
             </nav>
             <!-- partial -->
             <div class="main-panel">
-                <div class="content-wrapper">
+                <div class="content-wrapper" id="admin-content">
 
 
                     @RenderBody()
@@ -214,9 +212,20 @@
     <!-- inject:js -->
     <script src="../../assets/js/off-canvas.js"></script>
     <script src="../../assets/js/hoverable-collapse.js"></script>
+    <script src="../../assets/js/jquery.cookie.js"></script>
     <script src="../../assets/js/misc.js"></script>
     <!-- endinject -->
     <!-- Custom js for this page -->
     <!-- End custom js for this page -->
+    <!-- jQuery library (required by Bootstrap's JavaScript) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Popper.js (used for positioning dropdowns, tooltips, etc.) -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 </html>
