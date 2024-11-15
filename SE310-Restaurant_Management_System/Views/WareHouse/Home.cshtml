@@ -2,38 +2,62 @@
 @using SE310_Restaurant_Management_System.Models
 @model X.PagedList.IPagedList<Ingredient>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
- 
+
 @{
     ViewData["Title"] = "Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-    <h4 class="card-title">NGUYÊN LIỆU TRONG KHO</h4>
+<h4 class="card-title">NGUYÊN LIỆU TRONG KHO</h4>
 <div class="d-flex justify-content-between align-items-center mb-2">
-   
-    <!-- Search form on the left -->
-    <form class="d-flex align-items-center h-100" action="#">
-        <div class="input-group">
-            <div class="input-group-prepend bg-transparent">
-                <i class="input-group-text border-0 mdi mdi-magnify"></i>
+
+    <div class="col-md-4">
+        <!-- Adjust the column size as needed (e.g., col-md-4 for a narrower form) -->
+        <form class="d-flex align-items-center h-100" method="get" asp-action="Home">
+            <div class="input-group">
+                <!-- Search button -->
+                <div class="input-group-prepend bg-transparent">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="mdi mdi-magnify"></i>
+                    </button>
+                </div>
+                <!-- Search input with custom styles -->
+                <input type="text" class="form-control bg-transparent"
+                       placeholder="Tìm kiếm tên nguyên liệu" name="searchTerm"
+                       value="@ViewBag.SearchTerm"
+                       style="border: 1px solid #FF7651; height: 34px; padding: 0 12px; font-size: 1em;">
             </div>
-            <!-- Input with border and custom width -->
-            <input type="text" class="form-control border rounded" style="width: 400px;" placeholder="Tìm kiếm">
+        </form>
+    </div>
+
+    <!-- Dropdown filter with label and form submission -->
+    <div class="d-flex align-items-center justify-content-center mb-3" style="position:relative">
+        <label for="typeId" style="margin-right: 10px; font-weight: bold;">Loại nguyên liệu:</label>
+        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            @ViewBag.Name
+        </button>
+        <div class="dropdown-menu" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 34px, 0px);" data-popper-placement="bottom-start">
+            <a class="dropdown-item" asp-route-typeId="">Tất cả</a>
+            <a class="dropdown-item" asp-route-typeId="1">Động vật</a>
+            <a class="dropdown-item" asp-route-typeId="2">Thực vật</a>
+            <a class="dropdown-item" asp-route-typeId="3">Nguyên liệu thô</a>
         </div>
-    </form>
+    </div>
+
+    <!-- Other buttons -->
     <div>
-        <button type="button" class="btn btn-primary btn-md" data-toggle="modal" data-target="#exampleModal">Nhập Kho</button>
-        <button type="button" class="btn btn-outline-primary btn-md">Xuất Kho</button>
+        <button type="button" class="btn btn-primary btn-md" onclick="location.href='@Url.Action("CreateImport", "WareHouse")'">Nhập Kho</button>
+        <button type="button" class="btn btn-outline-primary btn-md" onclick="location.href='@Url.Action("CreateExport", "WareHouse")'">Xuất Kho</button>
     </div>
 </div>
-  
+
 <table class="table table-striped" style="position:relative">
     <thead>
         <tr>
             <th>Tên</th>
             <th>Loại</th>
-            <th>Số lượng </th>
-            <th>Đơn vị </th>
+            <th>Số lượng</th>
+            <th>Đơn vị</th>
             <th>Ngày nhập</th>
         </tr>
     </thead>
@@ -43,49 +67,19 @@
             <tr>
                 <td>@item.IngredientName</td>
                 <td>@item.Type.TypeName</td>
-                <td>@item.Quantity </td>
+                <td>@item.Quantity</td>
                 <td>@item.Unit</td>
                 <td>@item.ImportDate</td>
             </tr>
         }
     </tbody>
 </table>
- 
+
 <div style="position:fixed; top:600px">
-    @Html.PagedListPager(Model, page => Url.Action("Home", new { page = page }), new PagedListRenderOptions()
+    @Html.PagedListPager(Model, page => Url.Action("Home", new { page = page, typeId = ViewContext.HttpContext.Request.Query["typeId"] }), new PagedListRenderOptions()
 {
     LiElementClasses = new List<String> { "page-item" },
     PageClasses = new List<String> { "page-link" }
 })
 </div>
 
-<!-- jQuery library (required by Bootstrap's JavaScript) -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-
-<!-- Popper.js (used for positioning dropdowns, tooltips, etc.) -->
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-
-<!-- Bootstrap JavaScript -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
- 
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                ...
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </div>
-</div>

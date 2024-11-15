@@ -4,8 +4,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@foreach( var item in Model)
+@foreach (var item in Model)
 {
-    <h1>@item.Name</h1>
+    <form asp-action="Logout" asp-controller="Login" method="post">
+        <button type="submit" class="btn btn-primary">Log Out</button>
+    </form>
 }
-
