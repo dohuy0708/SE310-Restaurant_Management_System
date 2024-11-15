@@ -50,7 +50,7 @@ namespace SE310_Restaurant_Management_System.Controllers
                 }
                 else if (user.Role.RoleName == "Cashier")
                 {
-                    return RedirectToAction("Home", "Cashier");
+                    return RedirectToAction("MenuItem", "Cashier");
                 }
                 else if (user.Role.RoleName == "Staff")
                 {

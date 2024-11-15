@@ -1,5 +1,8 @@
 ﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.MenuItem>
 
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
 <div class="input-group-prepend mb-3" style="position:relative">
     <button class="btn btn-sm btn-outline-primary dropdown-toggle  type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@ViewBag.Name</button>
     <div class="dropdown-menu " style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 34px, 0px);" data-popper-placement="bottom-start">

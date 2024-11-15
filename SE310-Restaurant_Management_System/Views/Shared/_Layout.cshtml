@@ -14,7 +14,7 @@
           href="../../assets/vendors/css/vendor.bundle.base.css" />
     <!-- endinject -->
     <!-- sweetalert2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Layout styles -->
@@ -166,9 +166,9 @@
                         </a>
                     </li>
                     <!-- Điều kiện hiển thị sidebar theo vai trò người dùng -->
-                    @Html.Partial("_CashierSidebar")
+                  
 
-                    @*       @if (User.IsInRole("Admin"))
+                           @if (User.IsInRole("Admin"))
                     {
                         @Html.Partial("_AdminSidebar")
                     }
