@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SE310_Restaurant_Management_System.Models;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 namespace SE310_Restaurant_Management_System.Controllers
 {
@@ -15,7 +16,6 @@ namespace SE310_Restaurant_Management_System.Controllers
             _logger = logger;
         }
 
-
         public IActionResult Index()
         {
             var menuItem = db.MenuItems.ToList();
@@ -23,10 +23,11 @@ namespace SE310_Restaurant_Management_System.Controllers
         }
 
 
-        
-
-    
-       
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
 
     }
 }

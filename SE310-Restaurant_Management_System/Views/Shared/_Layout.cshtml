@@ -166,7 +166,6 @@
                         </a>
                     </li>
                     <!-- Điều kiện hiển thị sidebar theo vai trò người dùng -->
-                  
 
                            @if (User.IsInRole("Admin"))
                     {
@@ -186,7 +185,7 @@
             </nav>
             <!-- partial -->
             <div class="main-panel">
-                <div class="content-wrapper">
+                <div class="content-wrapper" id="admin-content">
 
 
                     @RenderBody()
@@ -213,6 +212,7 @@
     <!-- inject:js -->
     <script src="../../assets/js/off-canvas.js"></script>
     <script src="../../assets/js/hoverable-collapse.js"></script>
+    <script src="../../assets/js/jquery.cookie.js"></script>
     <script src="../../assets/js/misc.js"></script>
     <!-- endinject -->
     <!-- Custom js for this page -->

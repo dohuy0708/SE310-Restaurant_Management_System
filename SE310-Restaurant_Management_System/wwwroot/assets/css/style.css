@@ -20169,15 +20169,16 @@ dl {
         vertical-align: middle;
         font-size: 0.875rem;
         line-height: 1;
-        white-space: nowrap;
+        white-space: normal;
         padding: 0.9375rem;
+        word-wrap: break-word;
     }
 
         .table th img,
         .table td img {
-            width: 36px;
-            height: 36px;
-            border-radius: 100%;
+            width: 100px;
+            height: 100px;
+            border-radius: 20%;
         }
 
         .table th .badge,
