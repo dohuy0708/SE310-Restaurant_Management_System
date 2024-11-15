@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SE310_Restaurant_Management_System.Models;
+using Microsoft.AspNetCore.Authorization;
 using X.PagedList;
 
+
 namespace SE310_Restaurant_Management_System.Controllers.Admin
-{
-    [Route("Admin")]
+
+    [Route("admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private QlnhaHangContext db = new QlnhaHangContext();

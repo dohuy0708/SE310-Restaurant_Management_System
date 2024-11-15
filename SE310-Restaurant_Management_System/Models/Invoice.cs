@@ -10,6 +10,7 @@ public partial class Invoice
     public int? TableId { get; set; }
 
     public decimal? TotalAmount { get; set; }
+    public bool IsPaid {  get; set; }=false;
 
     public DateTime InvoiceDate { get; set; }
 

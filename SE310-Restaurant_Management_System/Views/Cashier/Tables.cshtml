@@ -1,0 +1,410 @@
+﻿@model IEnumerable<SE310_Restaurant_Management_System.Models.RestaurantTable>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="btn-group mb-3" role="group" aria-label="Chọn trạng thái bàn">
+    <button type="button" class="btn btn-secondary btn-danger" onclick="filterTables(null, this)">Tất cả</button>
+    <button type="button" class="btn btn-secondary" onclick="filterTables(1,this)">Đang đặt</button>
+    <button type="button" class="btn btn-secondary" onclick="filterTables(2,this)">Trống</button>
+    <button type="button" class="btn btn-secondary" onclick="filterTables(3,this)">Đang phục vụ</button>
+</div>
+
+<div id="tablesContainer">
+    @await Html.PartialAsync("_TablesPartial", Model)
+</div>
+
+
+<!-- Modal -->
+<!-- Modal -->
+<div class="modal fade" id="menuModal" tabindex="-1" role="dialog" aria-labelledby="menuModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom" role="document">
+        <div class="modal-content">
+            <style>
+                .modal-custom {
+                    max-width: 80%;
+                    width: auto;
+                }
+
+                
+                .menu-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
+
+                .menu-list {
+                    flex: 1; /* Phần trái chiếm 1 phần */
+                    margin-right: 20px; /* Khoảng cách giữa hai cột */
+                }
+
+                .order-list {
+                    flex: 1; /* Phần phải chiếm 1 phần */
+                    border-left: 1px solid #ccc; /* Đường viền giữa hai phần */
+                    padding-left: 20px; /* Khoảng cách bên trái của danh sách đã gọi */
+                }
+            </style>
+            <div class="modal-header pb-0" style="align-items: flex-start;">
+                <div>
+                    <h3 class="modal-title mb-3" id="menuModalLabel">Chọn món</h3>
+                    <div class="input-group-prepend mb-3" style="position:relative">
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Danh mục</button>
+                        <div class="dropdown-menu">
+                            @foreach (var subCategory in ViewBag.SubCategories)
+                            {
+                                <a class="dropdown-item" href="#" onclick="loadMenuItems(@subCategory.SubCategoryId)">
+                                    @subCategory.SubCategoryName
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; font-size: 26px; ">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+               
+            </div>
+            <div class="modal-body pt-0" style="max-height:500px;display:flex;overflow-y:auto">
+                <div class="menu-list" id="menuItemsContainer">
+                    <!-- Nội dung món ăn sẽ được tải vào đây -->
+                </div>
+                <div class="order-list">
+                    <h6>Các món đã gọi:</h6>
+                    <ul id="orderedItemsList">
+                        <!-- Các món đã gọi sẽ được thêm vào đây -->
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="confirmOrder()">Xác nhận đặt món</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="invoiceDetailsModalInTable" tabindex="-1" aria-labelledby="invoiceDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 0.5rem 1rem;">
+                <h3 class="modal-title" id="invoiceDetailsLabel">Chi tiết hóa đơn</h3>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; font-size: 26px; line-height: 0;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="invoiceDetailsContentInTable" style="padding-top: 0.5rem">
+                <!-- Nội dung chi tiết hóa đơn sẽ được nạp ở đây -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button id="payButton" type="button" class="btn btn-primary" onclick="executePayment()" style="display: none;">Thanh toán</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let orderedItems = []; // Mảng lưu các món đã gọi
+    let selectedTableId = null;
+
+    function filterTables(status, button) {
+        // Gửi AJAX request để lọc danh sách bàn
+        $.ajax({
+            url: '@Url.Action("FilterTablesByStatus")',
+            type: 'GET',
+            data: { status: status },
+            success: function (data) {
+                $('#tablesContainer').html(data);
+
+                // Xóa lớp btn-selected khỏi tất cả các nút trong nhóm
+                $('.btn-group .btn').removeClass('btn-danger');
+
+                // Thêm lớp btn-selected vào nút hiện tại
+                $(button).addClass('btn-danger');
+            },
+            error: function (xhr, status, error) {
+                console.error("Không thể tải danh sách bàn:", error);
+            }
+        });
+    }
+
+    function cancelReservation(tableId) {
+        Swal.fire({
+            title: 'Bạn có chắc chắn muốn hủy đặt bàn này?',
+            text: "Thao tác này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Nếu người dùng xác nhận hủy đặt bàn
+                $.ajax({
+                    url: '@Url.Action("CancelReservation")', // Action hủy đặt bàn trong controller
+                    type: 'POST',
+                    data: { id: tableId },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire(
+                                'Thành công!',
+                                'Hủy đặt bàn thành công!',
+                                'success'
+                            ).then(() => {
+                                location.reload(); // Refresh lại trang để cập nhật trạng thái
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: 'Có lỗi xảy ra: ' + response.message,
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Đã xảy ra lỗi khi xử lý yêu cầu hủy đặt bàn.',
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+
+    function confirmPaymentForTable(tableId) {
+        $.ajax({
+            url: '@Url.Action("GetInvoiceDetailsByTableId", "Cashier")',
+            type: 'GET',
+            data: { tableId: tableId },
+            success: function (data) {
+                $('#invoiceDetailsContentInTable').html(data);
+                var invoiceId = $('#invoiceDetailsContentInTable').find('#invoiceId').val();
+                $('#invoiceDetailsModalInTable').data('invoice-id', invoiceId);
+                $('#payButton').show();
+                $('#invoiceDetailsModalInTable').modal('show');
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra khi tải chi tiết hóa đơn',
+                });
+            }
+        });
+    }
+    function executePayment() {
+        const invoiceId = $('#invoiceDetailsModalInTable').data('invoice-id');
+
+        $.ajax({
+            url: '@Url.Action("ConfirmPayment", "Cashier")',
+            type: 'POST',
+            data: { id: invoiceId },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thanh toán thành công!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        $('#invoiceDetailsModalInTable').modal('hide');
+                        location.reload(); // Tải lại trang để cập nhật trạng thái
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Có lỗi xảy ra: ' + response.message,
+                    });
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Đã xảy ra lỗi khi xử lý yêu cầu thanh toán.',
+                });
+            }
+        });
+    }
+
+
+    function showMenuModal(tableId) {
+        orderedItems = [];
+        $('#orderedItemsList').empty()
+        selectedTableId = tableId;
+        $.ajax({
+            url: '@Url.Action("GetMenuItems")',
+            type: 'GET',
+            success: function (data) {
+                $('#menuItemsContainer').html(data);
+                $('#menuModal').modal('show'); // Hiển thị modal
+                addEventListeners(); // Thêm sự kiện cho các nút
+            },
+            error: function (xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra: '+ error,
+                });
+            }
+        });
+    }
+
+    function loadMenuItems(subCategoryId) {
+
+        $.ajax({
+            url: '@Url.Action("GetMenuItems")',
+            type: 'GET',
+            data: { id: subCategoryId },
+            success: function (data) {
+                $('#menuItemsContainer').html(data);
+                addEventListeners(); // Thêm sự kiện cho các nút
+            },
+            error: function (xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra: ' + error,
+                });
+            }
+        });
+    }
+
+    function addEventListeners() {
+        $('.add-to-order').off('click').on('click', function () {
+            const menuItemId = $(this).data('id');
+            const menuItemName = $(this).data('name'); // Lấy tên món ăn
+            const menuItemPrice = $(this).data('price'); // Lấy giá
+
+            addToOrder(menuItemId, menuItemName, menuItemPrice);
+        });
+
+        $('.remove-from-order').off('click').on('click', function () {
+            const menuItemId = $(this).data('id');
+            removeFromOrder(menuItemId);
+        });
+    }
+
+    function addToOrder(menuItemId, menuItemName, menuItemPrice) {
+        let item = orderedItems.find(i => i.id === menuItemId);
+
+        if (item) {
+            item.quantity++; // Tăng số lượng nếu món đã có
+            $(`#ordered-item-${menuItemId} .item-quantity`).text(item.quantity);
+        } else {
+            item = { id: menuItemId, name: menuItemName,price:menuItemPrice, quantity: 1 };
+            orderedItems.push(item);
+            $('#orderedItemsList').append(`
+                        <li id="ordered-item-${menuItemId}"  class="d-flex justify-content-between align-items-center mb-2" style="width: 50%">
+                  <div>  ${menuItemName} (<span class="item-quantity">1</span>) </div>
+                                <button class="btn btn-danger btn-sm remove-from-order " " data-id="${menuItemId}" onClick="removeFromOrder('${menuItemId}')">-</button>
+                </li>
+            `);
+
+            // Gọi lại addEventListeners để gán sự kiện cho các nút mới
+            addEventListeners();
+        }
+
+    }
+
+    function removeFromOrder(menuItemId) {
+        const index = orderedItems.findIndex(i => i.id === menuItemId);
+
+        if (index !== -1) {
+            const item = orderedItems[index];
+            if (item.quantity > 1) {
+                item.quantity--; // Giảm số lượng nếu còn lớn hơn 1
+                $(`#ordered-item-${menuItemId} .item-quantity`).text(item.quantity);
+            } else {
+                orderedItems.splice(index, 1); // Xóa món khỏi danh sách nếu số lượng = 1
+                $(`#ordered-item-${menuItemId}`).remove(); // Xóa món khỏi danh sách hiển thị
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Không tìm thấy món ăn',
+            });
+        }
+    }
+
+    function closeModal() {
+        $('#menuModal').modal('hide'); // Ẩn modal sau khi xác nhận
+        orderedItems = [];
+        $('#orderedItemsList').empty()
+    }
+
+    function confirmOrder() {
+        if (orderedItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thông báo',
+                text: 'Vui lòng chọn ít nhất một món để đặt',
+            });
+            return;
+        }
+
+
+        // Lấy tableId từ button đặt món được click
+        const tableId = parseInt(selectedTableId);
+
+        const orderData = {
+            TableId: selectedTableId,
+            Items: orderedItems.map(item => ({
+                MenuItemId: item.id, // Đảm bảo MenuItemId được gán đúng
+                Quantity: item.quantity,
+                Price: item.price
+            }))
+        };
+
+        // Gửi request đến server
+       // console.log(orderData.Items); // Kiểm tra dữ liệu trước khi gửi
+        $.ajax({
+            url: '@Url.Action("ConfirmOrder")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(orderData),
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: 'Gọi món thành công!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(()=>{
+                        $('#menuModal').modal('hide');
+                        orderedItems = [];
+                        $('#orderedItemsList').empty();
+                        // Refresh lại danh sách bàn
+                        location.reload();
+                    });
+
+                  
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Có lỗi xảy ra: ' + response.message,
+                    });
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Đã xảy ra lỗi khi xử lý yêu cầu',
+                });
+            }
+        });
+
+    }
+
+  
+</script>

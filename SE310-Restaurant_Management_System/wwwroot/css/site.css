@@ -1,22 +1,59 @@
-html {
-  font-size: 14px;
+﻿/* Tạo kiểu cho phần chứa phân trang */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
+    /* Tạo kiểu cho danh sách phân trang */
+    .pagination-container .pagination {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
+        /* Style cho từng item trong phân trang */
+        .pagination-container .pagination li {
+            margin: 0 5px;
+        }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+            .pagination-container .pagination li a,
+            .pagination-container .pagination li span {
+                padding: 8px 16px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #f8f9fa;
+                color: #007bff;
+                text-decoration: none;
+                transition: background-color 0.3s, border-color 0.3s;
+            }
 
-body {
-  margin-bottom: 60px;
-}
+                /* Style cho các nút khi hover hoặc focus */
+                .pagination-container .pagination li a:hover,
+                .pagination-container .pagination li a:focus {
+                    background-color: #007bff;
+                    color: white;
+                    border-color: #0056b3;
+                }
+
+            /* Style cho các trang hiện tại */
+            .pagination-container .pagination li.active span {
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+            }
+
+            /* Style cho các nút đầu và cuối trang */
+            .pagination-container .pagination li.PagedList-skipToFirst a,
+            .pagination-container .pagination li.PagedList-skipToLast a {
+                font-weight: bold;
+            }
+
+            /* Style cho các nút không thể click được (disabled) */
+            .pagination-container .pagination li.disabled a {
+                pointer-events: none;
+                color: #6c757d;
+            }

@@ -1,0 +1,44 @@
+﻿@model SE310_Restaurant_Management_System.Models.Invoice
+
+<div>
+    <p style="display:inline; margin-right:3rem;"><strong>Mã hóa đơn:</strong> @Model.InvoiceId</p>
+    <p style ="display:inline; margin-right:3rem;"><strong>Bàn:</strong> @Model.TableId</p>
+    <p style="display:inline; margin-right:3rem;"><strong>Ngày:</strong> @Model.InvoiceDate.ToString("dd/MM/yyyy")</p>
+    <p><strong>Trạng thái:</strong> @(Model.IsPaid ? "Đã thanh toán" : "Chưa thanh toán")</p>
+    <input type="hidden" id="invoiceId" value="@ViewData["InvoiceId"]" />
+    <h5>Chi Tiết Món</h5>
+    <div class="modal-table" style="max-height: 400px;overflow-y: auto;">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Món</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                </tr>
+            </thead>
+            <tbody >
+                @foreach (var item in Model.InvoiceItems)
+                {
+                    <tr>
+                        <td>@item.MenuItem.Name</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Price</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Tổng Tiền</strong></td>
+                    <td></td>
+                    <td> <strong>@Model.TotalAmount</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+</div>
+</div>
+@if (!Model.IsPaid)
+{
+    <script>
+        document.getElementById("payButton").style.display = "inline";
+    </script>
+}
