@@ -152,6 +152,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             {
                 model.RevenueByDay = new List<RevenueData> { GetRevenueByDate(date.Value) };
                 model.ChartType = "day";
+               
             }
             else if (month.HasValue && year.HasValue)
             {
@@ -167,6 +168,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             else
             {
                 model.RevenueByDay = new List<RevenueData> { GetRevenueByDate(DateTime.Today) };
+                
                 model.RevenueByMonth = new List<RevenueData> { GetRevenueByMonth(DateTime.Today.Year, DateTime.Today.Month) };
                 model.RevenueByYear = GetRevenueByMonthsInYear(DateTime.Today.Year);
                 model.ChartType = "day";
@@ -177,7 +179,62 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             model.CurrentMonthRevenue = GetRevenueByMonth(DateTime.Today.Year, DateTime.Today.Month).TotalRevenue;
             model.CurrentYearRevenue = GetRevenueByMonthsInYear(DateTime.Today.Year).Sum(x => x.TotalRevenue);
 
+            ViewBag.ChartName = "Doanh thu hôm nay";
+            ViewBag.TotalRevenue = "Tổng cộng: " + GetRevenueByDate(DateTime.Today).TotalRevenue.ToString("N0") + " VNĐ";
             return View(model);
+        }
+        [HttpGet]
+        public IActionResult StatisticFilter(DateTime? date, int? month, int? year)
+        {
+            var model = new StatisticViewModel();
+            ViewBag.ChartName = "";
+            // Kiểm tra và xử lý theo ngày
+            if (date.HasValue)
+            {
+                model.RevenueByDay = new List<RevenueData> { GetRevenueByDate(date.Value) };
+                model.ChartType = "day";
+                ViewBag.ChartName = "Doanh thu ngày " + date.Value.ToString("dd/MM/yyyy");
+                ViewBag.TotalRevenue = "Tổng cộng: " + GetRevenueByDate(date.Value).TotalRevenue.ToString("N0")+" VNĐ";
+            }
+            // Kiểm tra và xử lý theo tháng
+            else if (month.HasValue)
+            {
+                model.RevenueByMonth = GetRevenueByDaysInMonth(year.Value, month.Value);
+                model.ChartType = "month";
+                ViewBag.ChartName ="Doanh thu tháng "+ month.Value.ToString()+'/'+year.Value.ToString();
+                ViewBag.TotalRevenue="Tổng cộng: "+ GetRevenueByMonth(year.Value,month.Value).TotalRevenue.ToString("N0") + " VNĐ";
+            }
+            // Kiểm tra và xử lý theo năm
+            else if (year.HasValue)
+            {
+                model.RevenueByYear = GetRevenueByMonthsInYear(year.Value);
+                model.ChartType = "year";
+                ViewBag.ChartName ="Doanh thu năm "+ year.Value.ToString();
+                var revenueData = GetRevenueByYear(year.Value);
+
+                // Tính tổng doanh thu trong năm
+                decimal totalRevenue = revenueData.Sum(r => r.TotalRevenue);
+
+                // Gán vào ViewBag để hiển thị
+                ViewBag.TotalRevenue = "Tổng cộng: " + totalRevenue.ToString("N0") + " VNĐ";
+
+            }
+            else
+            {
+                // Mặc định: thống kê theo ngày hôm nay
+                model.RevenueByDay = new List<RevenueData> { GetRevenueByDate(DateTime.Today) };
+                model.RevenueByMonth = new List<RevenueData> { GetRevenueByMonth(DateTime.Today.Year, DateTime.Today.Month) };
+                model.RevenueByYear = GetRevenueByMonthsInYear(DateTime.Today.Year);
+                model.ChartType = "day";
+            }
+
+            // Thêm tổng doanh thu cho period hiện tại
+            model.CurrentDayRevenue = GetRevenueByDate(DateTime.Today).TotalRevenue;
+            model.CurrentMonthRevenue = GetRevenueByMonth(DateTime.Today.Year, DateTime.Today.Month).TotalRevenue;
+            model.CurrentYearRevenue = GetRevenueByMonthsInYear(DateTime.Today.Year).Sum(x => x.TotalRevenue);
+
+            // Trả về một phần của trang (partial view) cho Ajax
+            return PartialView("_chartPartial", model);
         }
 
         private List<RevenueData> GetRevenueByDaysInMonth(int year, int month)
