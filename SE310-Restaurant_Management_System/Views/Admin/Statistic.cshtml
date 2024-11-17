@@ -1,8 +1,186 @@
-﻿
+﻿@model SE310_Restaurant_Management_System.Models.StatisticViewModel
 @{
     ViewData["Title"] = "Statistic";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Statistic</h1>
 
+<div class="container-fluid mt-4">
+    <!-- Cards hiển thị thông tin tổng quan -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Doanh thu hôm nay</h5>
+                    <p class="card-text h3">@Model.CurrentDayRevenue.ToString("N0") VNĐ</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Doanh thu tháng này</h5>
+                    <p class="card-text h3">@Model.CurrentMonthRevenue.ToString("N0") VNĐ</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Doanh thu năm này</h5>
+                    <p class="card-text h3">@Model.CurrentYearRevenue.ToString("N0") VNĐ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form chọn thời gian -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Thống kê doanh thu</h5>
+            <form id="statisticForm" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="periodType" id="dayRadio" value="day" checked>
+                        <label class="form-check-label" for="dayRadio">Theo ngày</label>
+                    </div>
+                    <input type="date" class="form-control period-input" id="dateInput" name="date">
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="periodType" id="monthRadio" value="month">
+                        <label class="form-check-label" for="monthRadio">Theo tháng</label>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <select class="form-select period-input" id="monthInput" name="month" disabled>
+                                
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">Tháng @i</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select class="form-select period-input" id="yearForMonth" name="year" disabled>
+                                @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year-1; i--)
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="periodType" id="yearRadio" value="year">
+                        <label class="form-check-label" for="yearRadio">Theo năm</label>
+                    </div>
+                    <select class="form-select period-input" id="yearInput" name="year" disabled>
+                        @for (int i = DateTime.Now.Year ; i >= DateTime.Now.Year -1; i--)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Xem thống kê</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <!-- Biểu đồ -->
+    <div class="card">
+        <div class="card-body">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+</div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    let currentChart = null;
+
+    function drawChart(type, labels, data) {
+        if (currentChart) currentChart.destroy();
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const config = {
+            type: type === 'area' ? 'line' : type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'doanh thu',
+                    data: data,
+                    backgroundColor: 'rgba(255, 159, 64,1)',
+                    borderWidth: 1,
+                }]
+            },
+            options: { responsive: true },
+        };
+
+        currentChart = new Chart(ctx, config);
+    }
+
+        // Xử lý dữ liệu ban đầu
+        const chartData = {
+            @if (Model.RevenueByDay?.Any() == true)
+            {
+                <text>
+                labels: [@Html.Raw(string.Join(",", Model.RevenueByDay.Select(x => $"'{x.Period}'")))],
+                data: [@Html.Raw(string.Join(",", Model.RevenueByDay.Select(x => x.TotalRevenue)))]
+        </text>
+    }
+    else if (Model.RevenueByMonth?.Any() == true)
+    {
+        <text>
+                labels: [@Html.Raw(string.Join(",", Model.RevenueByMonth.Select(x => $"'{x.Period}'")))],
+                data: [@Html.Raw(string.Join(",", Model.RevenueByMonth.Select(x => x.TotalRevenue)))]
+                </text>
+            }
+            else if (Model.RevenueByYear?.Any() == true)
+            {
+                <text>
+                labels: [@Html.Raw(string.Join(",", Model.RevenueByYear.Select(x => $"'{x.Period}'")))],
+                data: [@Html.Raw(string.Join(",", Model.RevenueByYear.Select(x => x.TotalRevenue)))]
+                </text>
+            }
+        };
+
+        // Vẽ biểu đồ ban đầu
+        drawChart('bar', chartData.labels, chartData.data);
+
+
+        // Xử lý sự kiện radio buttons
+        document.querySelectorAll('input[name="periodType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Disable tất cả input
+                document.querySelectorAll('.period-input').forEach(input => {
+                    input.disabled = true;
+                });
+
+                // Enable input tương ứng
+                switch(this.value) {
+                    case 'day':
+                        document.getElementById('dateInput').disabled = false;
+                        break;
+                    case 'month':
+                        document.getElementById('monthInput').disabled = false;
+                        document.getElementById('yearForMonth').disabled = false;
+                        break;
+                    case 'year':
+                        document.getElementById('yearInput').disabled = false;
+                        break;
+                }
+            });
+        });
+
+        // Set giá trị mặc định cho date input
+        document.getElementById('dateInput').valueAsDate = new Date();
+    // Set giá trị mặc định cho month input là tháng hiện tại
+        document.getElementById('monthInput').value = new Date().getMonth();
+
+    </script>
