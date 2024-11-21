@@ -166,8 +166,8 @@
                         </a>
                     </li>
                     <!-- Điều kiện hiển thị sidebar theo vai trò người dùng -->
-
-                           @if (User.IsInRole("Admin"))
+                    @Html.Partial("_AdminSidebar")
+                    @*        @if (User.IsInRole("Admin"))
                     {
                         @Html.Partial("_AdminSidebar")
                     }
@@ -178,7 +178,7 @@
                     else if (User.IsInRole("Staff"))
                     {
                         @Html.Partial("_StaffSidebar")
-                    }
+                    } *@
 
 
                 </ul>
@@ -192,11 +192,11 @@
                 </div>
                 <!-- content-wrapper ends -->
                 <!-- partial:../../partials/_footer.html -->
-                <footer class="footer">
+                @* <footer class="footer">
                     <div class="container-fluid d-flex justify-content-between">
                         <span class="text-muted d-block text-center text-sm-start d-sm-inline-block">Hoshi Restaurant</span>
                     </div>
-                </footer>
+                </footer> *@
                 <!-- partial -->
             </div>
             <!-- main-panel ends -->
