@@ -46,7 +46,7 @@ namespace SE310_Restaurant_Management_System.Controllers
                 // Điều hướng theo vai trò của người dùng
                 if (user.Role.RoleName == "Admin")
                 {
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Statistic", "Admin");
                 }
                 else if (user.Role.RoleName == "Cashier")
                 {

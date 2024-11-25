@@ -23,8 +23,8 @@
 
 
 <div class="modal fade" id="invoiceDetailsModal" tabindex="-1" aria-labelledby="invoiceDetailsLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog " style="max-width:600px">
+        <div class="modal-content" >
             <div class="modal-header" style="padding: 0.5rem 1rem;">
                 <h3 class="modal-title" id="invoiceDetailsLabel">Chi tiết hóa đơn</h3>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; font-size: 26px; line-height: 0;">
@@ -37,12 +37,60 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 <button id="payButton" type="button" class="btn btn-primary" onclick="executePayment()" style="display: none;">Thanh toán</button>
+                <button id="printInvoiceButton" class="btn btn-primary" onclick="downloadInvoice()" style="display: none;">In hóa đơn</button>
             </div>
         </div>
     </div>
 </div>
-    
+
+
+
 <script>
+    function downloadInvoice(){
+        const invoiceContent = document.getElementById('invoiceDetailsContent').innerHTML;
+
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.body.innerHTML = `
+            <html>
+                <head>
+                    <title>Hoshi Restaurant</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            width: 600px; 
+                            margin: 0 auto; 
+                        }
+                        h1 {
+                            text-align: center;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                        th, td {
+                            padding: 8px;
+                            text-align: center;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>Hóa đơn</h1>
+        `;
+            printWindow.document.body.innerHTML += invoiceContent;
+            printWindow.document.close();
+            printWindow.print();
+            
+        } else {
+            alert('Pop-up bị chặn! Hãy kiểm tra cài đặt trình duyệt.');
+        }
+
+    }
+
+
     function filterInvoices(isPaid, button) {
         // Lưu lại trạng thái lựa chọn
         document.querySelectorAll('.btn-group button').forEach(btn => btn.classList.remove('btn-danger'));

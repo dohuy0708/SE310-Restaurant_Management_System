@@ -8,7 +8,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">@item.Name</h5>
                     <div class="d-flex align-items-center">
-                        <h5 class="card-text mb-0 me-2">@item.Price</h5>
+                        <h5 class="card-text mb-0 me-2">@item.Price.ToString("N0") đ</h5>
                         <button class="btn btn-primary btn-sm" onclick="addToOrder('@item.MenuItemId','@item.Name',@item.Price)">+</button>
                     </div>
                 </div>

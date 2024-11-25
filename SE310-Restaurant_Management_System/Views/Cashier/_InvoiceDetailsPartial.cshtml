@@ -2,27 +2,29 @@
 
 <div>
     <p style="display:inline; margin-right:3rem;"><strong>Mã hóa đơn:</strong> @Model.InvoiceId</p>
-    <p style ="display:inline; margin-right:3rem;"><strong>Bàn:</strong> @Model.TableId</p>
+    <p style="display:inline; margin-right:3rem;"><strong>Bàn:</strong> @Model.TableId</p>
     <p style="display:inline; margin-right:3rem;"><strong>Ngày:</strong> @Model.InvoiceDate.ToString("dd/MM/yyyy")</p>
     <p><strong>Trạng thái:</strong> @(Model.IsPaid ? "Đã thanh toán" : "Chưa thanh toán")</p>
-    <input type="hidden" id="invoiceId" value="@ViewData["InvoiceId"]" />
+
     <h5>Chi Tiết Món</h5>
-    <div class="modal-table" style="max-height: 400px;overflow-y: auto;">
+    <div class="modal-table" style="max-height: 400px; overflow-y: auto;">
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Món</th>
                     <th>Số lượng</th>
                     <th>Đơn giá</th>
+                    <th>Thành tiền</th>
                 </tr>
             </thead>
-            <tbody >
-                @foreach (var item in Model.InvoiceItems)
+            <tbody>
+                @foreach (var item in (IEnumerable<dynamic>)ViewData["GroupedInvoiceItems"])
                 {
                     <tr>
-                        <td>@item.MenuItem.Name</td>
+                        <td>@item.MenuItemName</td>
                         <td>@item.Quantity</td>
-                        <td>@item.Price</td>
+                        <td>@item.Price.ToString("N0") đ</td>
+                        <td>@item.TotalPrice.ToString("N0") đ</td>
                     </tr>
                 }
             </tbody>
@@ -30,15 +32,25 @@
                 <tr>
                     <td><strong>Tổng Tiền</strong></td>
                     <td></td>
-                    <td> <strong>@Model.TotalAmount</strong></td>
+                    <td></td>
+                    <td><strong>@Model.TotalAmount.Value.ToString("N0") đ</strong></td>
                 </tr>
             </tfoot>
         </table>
+    </div>
 </div>
-</div>
+
 @if (!Model.IsPaid)
 {
     <script>
         document.getElementById("payButton").style.display = "inline";
+        document.getElementById("printInvoiceButton").style.display = "none";
+    </script>
+}
+@if (Model.IsPaid)
+{
+    <script>
+        document.getElementById("printInvoiceButton").style.display = "inline";
+        document.getElementById("payButton").style.display = "none";
     </script>
 }

@@ -21,7 +21,7 @@
         <div class="modal-content">
             <style>
                 .modal-custom {
-                    max-width: 80%;
+                    max-width: 60%;
                     width: auto;
                 }
 
@@ -34,12 +34,12 @@
                 }
 
                 .menu-list {
-                    flex: 1; /* Phần trái chiếm 1 phần */
+                    flex: 3; /* Phần trái chiếm 1 phần */
                     margin-right: 20px; /* Khoảng cách giữa hai cột */
                 }
 
                 .order-list {
-                    flex: 1; /* Phần phải chiếm 1 phần */
+                    flex: 2; /* Phần phải chiếm 1 phần */
                     border-left: 1px solid #ccc; /* Đường viền giữa hai phần */
                     padding-left: 20px; /* Khoảng cách bên trái của danh sách đã gọi */
                 }
@@ -85,7 +85,7 @@
 
 
 <div class="modal fade" id="invoiceDetailsModalInTable" tabindex="-1" aria-labelledby="invoiceDetailsLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width:600px">
         <div class="modal-content">
             <div class="modal-header" style="padding: 0.5rem 1rem;">
                 <h3 class="modal-title" id="invoiceDetailsLabel">Chi tiết hóa đơn</h3>
@@ -242,6 +242,7 @@
             url: '@Url.Action("GetMenuItems")',
             type: 'GET',
             success: function (data) {
+                 $('#menuModalLabel').text("Chọn món - Bàn " + tableId);
                 $('#menuItemsContainer').html(data);
                 $('#menuModal').modal('show'); // Hiển thị modal
                 addEventListeners(); // Thêm sự kiện cho các nút
@@ -301,7 +302,7 @@
             item = { id: menuItemId, name: menuItemName,price:menuItemPrice, quantity: 1 };
             orderedItems.push(item);
             $('#orderedItemsList').append(`
-                        <li id="ordered-item-${menuItemId}"  class="d-flex justify-content-between align-items-center mb-2" style="width: 50%">
+                        <li id="ordered-item-${menuItemId}"  class="d-flex justify-content-between align-items-center mb-2" style="width: 90%">
                   <div>  ${menuItemName} (<span class="item-quantity">1</span>) </div>
                                 <button class="btn btn-danger btn-sm remove-from-order " " data-id="${menuItemId}" onClick="removeFromOrder('${menuItemId}')">-</button>
                 </li>

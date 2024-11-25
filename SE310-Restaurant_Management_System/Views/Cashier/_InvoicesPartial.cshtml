@@ -19,7 +19,7 @@
                 <tr class="table-warning">
                     <td>@item.TableId</td>
                     <td>@item.InvoiceDate</td>
-                    <td>@item.TotalAmount</td>
+                    <td>@item.TotalAmount.Value.ToString("N0") đ</td>
                     <td>@status</td>
                     <td>
                         @if (!item.IsPaid)
