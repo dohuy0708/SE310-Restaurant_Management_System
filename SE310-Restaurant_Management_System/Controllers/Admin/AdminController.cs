@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using X.PagedList;
 
 
-namespace SE310_Restaurant_Management_System.Controllers.Admin
+namespace SE310_Restaurant_Management_System.Controllers.Admin { 
 
     [Route("admin")]
     [Authorize(Roles = "Admin")]
