@@ -94,8 +94,8 @@
                         @Html.DisplayFor(modelItem => item.Price)
                     </td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-warning" onclick="location.href='@Url.Action("EditItem", "Admin")'">Sửa</button>
-                        <button class="btn btn-sm btn-danger" onclick="location.href='@Url.Action("DeleteItem", "Admin")'">Xóa</button>
+                        <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="edititem" asp-route-id="@item.MenuItemId">Sửa</a>
+                        <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deleteitem" asp-route-id="@item.MenuItemId">Xóa</a>
                     </td>
                 </tr>
             }

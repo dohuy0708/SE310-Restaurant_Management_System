@@ -2,7 +2,7 @@
 @model MenuItemModel
 
 @{
-    ViewData["Title"] = "AddNewItem";
+    ViewData["Title"] = "EditItem";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -11,27 +11,26 @@
 <div class="col-12 grid-margin stretch-card">
     <div class="card">
         <div class="card-body">
-            <h4 class="card-title">Thêm mới món ăn</h4>
+            <h4 class="card-title">Chỉnh sửa món ăn</h4>
             <p class="card-description"> Thông tin cơ bản </p>
-            <form method="post" asp-action="AddNewItem" asp-controller="Admin" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-group">
+                    <label>ID</label>
+                    <input class="form-control-plaintext" readonly value="@ViewData["ItemId"]">
+                    <input type="hidden" name="id" value="@ViewData["ItemId"]" />
+                </div>
+
+                <div class="form-group">
                     <label asp-for="Name">Tên món ăn</label>
-                    <input asp-for="Name" class="form-control" placeholder="Nhập tên">
+                    <input asp-for="Name" class="form-control">
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
-                @* <div class="form-group">
-                    <label asp-for="ImagePath">Hình ảnh</label>
-                    <input type="file" id="fileInput" name="img[]" class="file-upload-default">
-                    <div class="input-group col-xs-12">
-                        <input asp-for="ImagePath" type="text" class="form-control file-upload-info" id="fileName" disabled="" placeholder="Tải lên hình ảnh">
-                        <span class="input-group-append">
-                            <button class="file-upload-browse btn btn-gradient-primary" id="uploadButton" type="button">Tải lên</button>
-                        </span>
-                    </div>
-                </div> *@
+                <div>
+                    <img src="/assets/images/foods/@ViewData["ItemImage"]" />
+                </div>
 
                 <div class="form-group">
                     <label asp-for="ImagePath">Hình ảnh</label>
@@ -49,7 +48,7 @@
 
                 <div class="form-group">
                     <label asp-for="Price">Giá</label>
-                    <input asp-for="Price" class="form-control" placeholder="Nhập giá">
+                    <input asp-for="Price" class="form-control" >
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
 
@@ -63,8 +62,8 @@
 
                 <div class="form-group">
 
-                <input type="submit" class="btn btn-primary"></input>
-                <a class="btn btn-light" type="button" asp-action="MenuItem">Cancel</a>
+                    <input type="submit" class="btn btn-primary"></input>
+                    <a class="btn btn-light" type="button" asp-action="MenuItem">Cancel</a>
                 </div>
 
             </form>
@@ -75,5 +74,10 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="../../assets/js/file-upload.js"></script>
 
+<script>
+    function goBack(){
+        window.history.back();
+    }
 
+</script>
 

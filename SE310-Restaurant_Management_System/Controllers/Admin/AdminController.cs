@@ -7,6 +7,7 @@ using SE310_Restaurant_Management_System.ViewModels;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace SE310_Restaurant_Management_System.Controllers.Admin
 {
@@ -94,9 +95,41 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
 
         [Route("addnewitem")]
         [HttpPost]
-        public async Task<IActionResult> AddNewItem(MenuItemModel itemModel)
+        public IActionResult AddNewItem(MenuItemModel itemModel)
         {
-            if (ModelState.IsValid)
+            if (itemModel.ImagePath == null)
+            {
+                ModelState.AddModelError("ImagePath", "File hình ảnh là bắt buộc");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(itemModel);
+            }
+
+            string newFileName = itemModel.ImagePath.FileName;
+
+            string imageFullPath = _webHostEnvironment.WebRootPath + "/assets/images/foods/" + newFileName;
+            using (var stream = System.IO.File.Create(imageFullPath))
+            {
+                itemModel.ImagePath.CopyTo(stream);
+            }
+
+            MenuItem menuItem = new MenuItem()
+            {
+                Name = itemModel.Name,
+                Description = itemModel.Description,
+                Image = newFileName,
+                Price = itemModel.Price,
+                SubCategoryId = itemModel.SubCategoryId,
+            };
+
+            db.MenuItems.Add(menuItem);
+            db.SaveChanges();
+
+            return RedirectToAction("MenuItem", "Admin");
+
+            /*if (ModelState.IsValid)
             {
                 if (itemModel.ImagePath != null)
                 {
@@ -115,56 +148,137 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
                     Name = itemModel.Name,
                     Description = itemModel.Description,
                     Price = itemModel.Price,
-                    Image = itemModel.Image,
+                    Image = itemModel.ImagePath.FileName,
                     SubCategoryId = itemModel.SubCategoryId,
                 };
 
                 db.MenuItems.Add(menuItem);
                 await db.SaveChangesAsync();
 
-                return RedirectToAction(nameof(MenuItem), new { isSuccess = true, itemId = itemModel.MenuItemId });
+                return RedirectToAction("MenuItem");
             }
 
             ViewBag.SubCategoryId = new SelectList(db.SubCategories.ToList(), "SubCategoryId", "SubCategoryName");
 
-            return View(itemModel);
+            return View(itemModel);*/
         }
 
         [Route("edititem")]
         [HttpGet]
-        public IActionResult EditItem()
+        public IActionResult EditItem(int id)
         {
             ViewBag.SubCategoryId = new SelectList(db.SubCategories.ToList(), "SubCategoryId", "SubCategoryName");
 
-            return View();
+            var item = db.MenuItems.Find(id);
+
+            if (item == null)
+            {
+                return RedirectToAction("MenuItem", "Admin");
+            }
+
+            var model = new MenuItemModel()
+            {
+                Name = item.Name,
+                Description = item.Description,
+                Price = item.Price,
+                SubCategoryId = item.SubCategoryId,
+            };
+
+            ViewData["ItemId"] = item.MenuItemId;
+            ViewData["ItemImage"] = item.Image;
+
+            return View(model);
         }
 
         [Route("edititem")]
         [HttpPost]
-        public IActionResult EditItem(MenuItemModel item)
+        public IActionResult EditItem([FromForm] int id, MenuItemModel model)
         {
-            if (ModelState.IsValid)
+            var item = db.MenuItems.Find(id);
+
+            if (item == null)
             {
-                db.Entry(item).State = EntityState.Modified;
-                db.SaveChanges();
                 return RedirectToAction("MenuItem", "Admin");
             }
-            return View(item);
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["ItemId"] = item.MenuItemId;
+                ViewData["ItemImage"] = item.Image;
+
+                return View(model);
+            }
+
+            string newFileName = item.Image;
+            if (model.ImagePath != null)
+            {
+                newFileName = model.ImagePath.FileName;
+
+                string folder = "/assets/images/foods/";
+
+                string imageFullPath = _webHostEnvironment.WebRootPath + folder + newFileName;
+
+                using (var stream = System.IO.File.Create(imageFullPath))
+                {
+                    model.ImagePath.CopyTo(stream);
+                }
+
+                string oldIamgeFullPath = _webHostEnvironment.WebRootPath + "/assets/images/foods/" + item.Image;
+                System.IO.File.Delete(oldIamgeFullPath);
+            }
+
+            item.Name = model.Name;
+            item.Description = model.Description;
+            item.Image = newFileName;
+            item.Price = model.Price;
+            item.SubCategoryId = model.SubCategoryId;
+
+            db.SaveChanges();
+            return RedirectToAction("MenuItem", "Admin");
+
+            /*if (ModelState.IsValid)
+            {
+                var existingItem = await db.MenuItems.FindAsync(item.MenuItemId);
+
+                existingItem.Name = item.Name;
+                existingItem.Description = item.Description;
+                existingItem.Price = item.Price;
+                existingItem.SubCategoryId = item.SubCategoryId;
+
+                if (item.ImagePath != null)
+                {
+                    string folder = "assets/images/foods/";
+
+                    item.Image = item.ImagePath.FileName;
+
+                    folder += item.ImagePath.FileName;
+                    string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
+
+                    await item.ImagePath.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
+                }
+
+                await db.SaveChangesAsync();
+                return RedirectToAction("MenuItem", "Admin");
+            }
+            return View("EditItem", item);*/
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("deleteitem")]
         public IActionResult DeleteItem(int id)
         {
             var item = db.MenuItems.Find(id);
             if (item == null)
             {
-                return Json(new { success = false, message = "Không tìm thấy món ăn!" });
+                return RedirectToAction("MenuItem", "Admin");
             }
+            string imageFullPath = _webHostEnvironment.WebRootPath + "/assets/images/foods/" + item.Image;
+            System.IO.File.Delete(imageFullPath);
 
             db.MenuItems.Remove(item);
-            db.SaveChanges();
-            return Json(new { success = true, message = "Xóa món ăn thành công!" });
+            db.SaveChanges(true);
+
+            return RedirectToAction("MenuItem", "Admin");
         }
 
         [Route("Combo")]
