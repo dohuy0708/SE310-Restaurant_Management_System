@@ -13,13 +13,33 @@ namespace SE310_Restaurant_Management_System.Controllers
     {
         QlnhaHangContext db = new QlnhaHangContext();
 
-      
-        
+
+
         [HttpGet]
-        public IActionResult Login( )
+        public IActionResult Login()
         {
-            return View();
+            if (User.Identity.IsAuthenticated)
+            {
+                // Lấy vai trò từ claim của người dùng đã đăng nhập
+                var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+                if (role == "Admin")
+                {
+                    return RedirectToAction("MenuItem", "Admin");
+                }
+                else if (role == "Cashier")
+                {
+                    return RedirectToAction("MenuItem", "Cashier");
+                }
+                else if (role == "Staff")
+                {
+                    return RedirectToAction("Home", "WareHouse");
+                }
+            }
+
+            return View(); // Nếu chưa đăng nhập, hiển thị trang Login
         }
+    
 
         [HttpPost]
         public async Task<IActionResult> Login(AccountViewModel account)
@@ -46,7 +66,7 @@ namespace SE310_Restaurant_Management_System.Controllers
                 // Điều hướng theo vai trò của người dùng
                 if (user.Role.RoleName == "Admin")
                 {
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("MenuItem", "Admin");
                 }
                 else if (user.Role.RoleName == "Cashier")
                 {
