@@ -74,7 +74,7 @@
                     <p><strong>Mô tả:</strong> @exit.Description</p>
 
                     <h6>Chi Tiết Đơn Xuất:</h6>
-                    <table class="table table-bordered" style="border: 1px solid silver;">
+                    <table class="table table-danger" style="border: 1px solid silver;">
                         <thead style="border-bottom: 2px solid silver;">
                             <tr>
 
@@ -87,7 +87,7 @@
                         <tbody>
                             @foreach (var detail in exit.ExitDetails)
                             {
-                                <tr>
+                                <tr class="table-warning">
                                    
                                     <td>@detail.IngredientId</td>
                                     <td>@detail.IngredientName</td> <!-- Display IngredientName -->
@@ -106,10 +106,15 @@
     </div>
 }
 
-<div style="position:fixed; top:650px">
-    @Html.PagedListPager(Model, page => Url.Action("Export", new { page = page }), new PagedListRenderOptions()
+<div class="pagination-container text-center mt-4">
+    @Html.PagedListPager(Model, page => Url.Action("Export", new { page }), new PagedListRenderOptions
 {
-    LiElementClasses = new List<String> { "page-item" },
-    PageClasses = new List<String> { "page-link" }
+    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+    LiElementClasses = new List<string> { "page-item" },
+    PageClasses = new List<string> { "page-link" }
 })
 </div>
+

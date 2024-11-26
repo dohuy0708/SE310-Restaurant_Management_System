@@ -1,9 +1,9 @@
 ﻿@model SE310_Restaurant_Management_System.Models.StatisticViewModel
 
 <div>
-    <h3>@ViewBag.TotalRevenue</h3>
+    <h3 class="card-title">@ViewBag.TotalRevenue</h3>
     <canvas id="revenueChart"></canvas>
-    <h4 id="chartName" style="padding-left:60px; margin-top:10px"  class="text-center">@ViewBag.ChartName</h4>
+    <h4 id="chartName" style="padding-left:60px; margin-top:10px; font-weight:bold"  class="text-center">@ViewBag.ChartName</h4>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

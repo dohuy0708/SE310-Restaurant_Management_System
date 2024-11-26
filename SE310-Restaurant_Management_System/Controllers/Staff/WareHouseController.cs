@@ -31,7 +31,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Staff
         public IActionResult Home(int? page, int? typeId, string searchTerm)
         {
             int pageSize = 8;
-            int pageNumber = page == null || page < 0 ? 1 : page.Value;
+            int pageNumber = page == null || page <= 0 ? 1 : page.Value;
 
             // Start with all ingredients
             var ingredientsQuery = db.Ingredients.Include(i => i.Type).AsQueryable();
@@ -73,7 +73,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Staff
         public IActionResult Import(int? page, DateTime? selectedDate)
         {
             int pageSize = 8;
-            int pageNumber = page == null || page < 0 ? 1 : page.Value;
+            int pageNumber = page == null || page <= 0 ? 1 : page.Value;
 
             // Retrieve all entries and convert DateOnly to DateTime for comparison
             var imports = db.InventoryEntries
@@ -220,7 +220,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Staff
         public IActionResult Export(int? page, DateTime? selectedDate)
         {
             int pageSize = 8;
-            int pageNumber = page == null || page < 0 ? 1 : page.Value;
+            int pageNumber = page == null || page <= 0 ? 1 : page.Value;
 
             // Join InventoryExits and Ingredients to get IngredientName
             var exports = db.InventoryExits.Select(e => new InventoryExitViewModel

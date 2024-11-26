@@ -75,11 +75,16 @@
     </tbody>
 </table>
 
-<div style="position:fixed; top:600px">
-    @Html.PagedListPager(Model, page => Url.Action("Home", new { page = page, typeId = ViewContext.HttpContext.Request.Query["typeId"] }), new PagedListRenderOptions()
+<div class="pagination-container text-center mt-4">
+    @Html.PagedListPager(Model, page => Url.Action("Home", new { page, typeId = ViewContext.HttpContext.Request.Query["typeId"] }), new PagedListRenderOptions
 {
+    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+    DisplayLinkToNextPage = PagedListDisplayMode.Always,
     LiElementClasses = new List<String> { "page-item" },
     PageClasses = new List<String> { "page-link" }
 })
 </div>
+
 
