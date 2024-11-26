@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
 }
-
+<h1> Đơn đặt bàn</h1>
 @if (!string.IsNullOrEmpty(successMessage))
 {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -19,11 +19,9 @@
     </script>
 }
 
-<div class="card">
-    <div class="card-body">
-        <h4 class="card-title">Đơn đặt bàn</h4>
-        <button type="button" class="btn btn-sm btn-danger mb-2" onclick="location.href='@Url.Action("Booking")'">Đặt bàn</button>
-
+ 
+    <button type="button" class="btn btn-lg btn-danger mb-2" onclick="location.href='@Url.Action("Booking")'">Đặt bàn</button>
+ 
         <div class="table-responsive">
             <table class="table table-danger">
                 <thead>
@@ -60,8 +58,8 @@
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
+ 
+ 
 <script>
     function confirmCancelBooking(bookingOrderId) {
         Swal.fire({

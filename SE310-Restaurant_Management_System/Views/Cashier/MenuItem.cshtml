@@ -3,17 +3,47 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="input-group-prepend mb-3" style="position:relative">
-    <button class="btn btn-sm btn-outline-primary dropdown-toggle  type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@ViewBag.Name</button>
-    <div class="dropdown-menu " style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 34px, 0px);" data-popper-placement="bottom-start">
-        @foreach (var subCategory in ViewBag.SubCategories)
-        {
-            <a class="dropdown-item"  asp-route-id="@subCategory.SubCategoryId">@subCategory.SubCategoryName</a>
 
-        }
-        
+<h1>Menu</h1>
+
+<!-- Dropdown Filter -->
+<div class="d-flex align-items-center mb-3 gap-3">
+
+
+
+    <!-- Search Form -->
+    <div class="col-md-4" style="margin-right: 30px;">
+        <!-- Adjust the column size as needed (e.g., col-md-4 for a narrower form) -->
+        <form class="d-flex align-items-center h-100" method="get" asp-action="MenuItem">
+            <div class="input-group">
+                <!-- Search button -->
+                <div class="input-group-prepend bg-transparent">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="mdi mdi-magnify"></i>
+                    </button>
+                </div>
+                <!-- Search input with custom styles -->
+                <input type="text" class="form-control bg-transparent" placeholder="Tìm kiếm món ăn" name="searchTerm" style="border: 1px solid #FF7651; height: 34px; padding: 0 12px; font-size: 1em;" value="@ViewBag.SearchTerm">
+            </div>
+        </form>
     </div>
+    <div class="input-group-prepend">
+        <label for="typeId" style="margin-right: 10px; font-weight: bold;">Loại món ăn:</label>
+        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            @ViewBag.Name
+        </button>
+        <div class="dropdown-menu">
+            @foreach (var subCategory in ViewBag.SubCategories)
+            {
+                <a class="dropdown-item" asp-route-id="@subCategory.SubCategoryId">@subCategory.SubCategoryName</a>
+            }
+        </div>
+    </div>
+
+   
 </div>
+
+<!-- Menu Items -->
 <div class="row">
     @foreach (var item in Model)
     {

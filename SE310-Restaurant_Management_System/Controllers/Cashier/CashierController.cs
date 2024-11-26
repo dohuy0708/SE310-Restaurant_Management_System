@@ -15,7 +15,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
         }
 
 
-        public IActionResult MenuItem(int? id)
+        public IActionResult MenuItem(int? id, string searchTerm)
         {
             // Lấy danh sách SubCategories từ cơ sở dữ liệu
             var subCategories = db.SubCategories.AsNoTracking().ToList();
@@ -28,13 +28,13 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             });
 
             // Lấy tất cả menuItems
-            var menuItems = db.MenuItems.AsNoTracking();
+            var menuItemsQuery = db.MenuItems.AsNoTracking();
             ViewBag.Name = "Tất cả";
 
             // Nếu id không null và không phải là 0, lọc menuItems theo SubCategoryId
             if (id != null && id != 0)
             {
-                menuItems = menuItems.Where(mi => mi.SubCategoryId == id);
+                menuItemsQuery = menuItemsQuery.Where(mi => mi.SubCategoryId == id);
 
                 // Lấy tên SubCategory cho ViewBag.Name nếu có id hợp lệ
                 var subCategory = subCategories.FirstOrDefault(sC => sC.SubCategoryId == id);
@@ -44,9 +44,19 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
                 }
             }
 
+            // Xử lý tìm kiếm
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                menuItemsQuery = menuItemsQuery.Where(mi => mi.Name.Contains(searchTerm)); ;
+            }
+
+            // Truyền SubCategories và searchTerm cho view
             ViewBag.SubCategories = subCategories;
-            return View(menuItems.ToList());
+            ViewBag.SearchTerm = searchTerm;
+
+            return View(menuItemsQuery.ToList());
         }
+
 
         public IActionResult Tables()
         {
