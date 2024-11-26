@@ -87,9 +87,16 @@ namespace SE310_Restaurant_Management_System.Controllers
 
         public async Task<IActionResult> Logout()
         {
+            // Xóa cookie xác thực
             await HttpContext.SignOutAsync("CookieAuth");
+
+            // Xóa cookie theo tên
+            HttpContext.Response.Cookies.Delete(".AspNetCore.CookieAuth");
+
+            // Điều hướng lại trang login
             return RedirectToAction("Login", "Login");
         }
+
 
     }
 }
