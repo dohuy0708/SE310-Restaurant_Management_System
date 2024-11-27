@@ -114,11 +114,18 @@
                                 <span class="availability-status online"></span>
                             </div>
                             <div class="nav-profile-text">
-                                <p class="mb-1 text-black">Hoàng Huy</p>
+                                <p class="mb-1 text-black">@User.Identity.Name</p>
                             </div>
                         </a>
                         <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
                             <div class="dropdown-divider"></div>
+                                @if (User.IsInRole("Admin"))   
+                                  {
+                                <button class="dropdown-item" onclick="window.location.href='@Url.Action("ChangePassword", "Admin")'">
+
+                                    <i class=" mdi mdi-border-color me-2 text-success"></i> Đổi mật khẩu
+                                </button>
+                                  }
                             <button class="dropdown-item" onclick="confirmLogout()">
                                 <i class="mdi mdi-logout me-2 text-primary"></i> Đăng xuất
                             </button>
@@ -148,8 +155,10 @@
                                 <!--change to offline or busy as needed-->
                             </div>
                             <div class="nav-profile-text d-flex flex-column">
-                                <span class="font-weight-bold mb-2">Hoàng Huy</span>
-                                <span class="text-secondary text-small">Admin</span>
+                                <span class="font-weight-bold mb-2">@User.Identity.Name</span> <!-- Hiển thị tên người dùng -->
+                                <span class="text-secondary text-small">
+                                    @User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value
+                                </span> <!-- Hiển thị vai trò người dùng -->
                             </div>
                             <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
                         </a>

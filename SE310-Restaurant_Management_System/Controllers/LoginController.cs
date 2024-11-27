@@ -51,12 +51,16 @@ namespace SE310_Restaurant_Management_System.Controllers
             if (user != null)
             {
                 Console.WriteLine(user.Email + user.Role.RoleName);
-                
+
+                // Ví dụ về cách thêm claim khi đăng nhập người dùng
                 var claims = new List<Claim>
-            {
-            new Claim(ClaimTypes.Name, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.RoleName) // Role của người dùng
-            };
+{
+    new Claim(ClaimTypes.Email, user.Email),
+    new Claim(ClaimTypes.Name, user.Username),
+    new Claim(ClaimTypes.Role, user.Role.RoleName),
+};
+
+            
 
                 var identity = new ClaimsIdentity(claims, "CookieAuth");
                 var principal = new ClaimsPrincipal(identity);

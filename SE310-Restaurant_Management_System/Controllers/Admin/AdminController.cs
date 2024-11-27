@@ -4,9 +4,11 @@ using SE310_Restaurant_Management_System.Models;
 using Microsoft.AspNetCore.Authorization;
 using X.PagedList;
 using System.Globalization;
+using SE310_Restaurant_Management_System.ViewModels;
+using System.Security.Claims;
 
 
-namespace SE310_Restaurant_Management_System.Controllers.Admin { 
+namespace SE310_Restaurant_Management_System.Controllers.Admin {
 
     [Route("admin")]
     [Authorize(Roles = "Admin")]
@@ -141,7 +143,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             return View();
         }
 
-          // Huy Hoàng
+        // Huy Hoàng
 
         [Route("Statistic")]
         public IActionResult Statistic(DateTime? date, int? month, int? year)
@@ -381,12 +383,224 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
                             .OrderBy(x => x.UserId);
             PagedList<User> list = new PagedList<User>(listNV, pageNumber, pageSize);
 
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return PartialView("_Staff", list);
-            }
+
 
             return View(list);
         }
+
+        [HttpGet]
+        [Route("CreateStaff")]
+        public IActionResult CreateStaff()
+        {
+            var roles = new List<object>
+    {
+        new { RoleId = 2, RoleName = "Cashier" },
+        new { RoleId = 3, RoleName = "Staff" }
+    };
+
+            ViewBag.Roles = roles;
+            return View();
+        }
+        [HttpPost]
+        [Route("CreateStaff")]
+        public async Task<IActionResult> CreateStaff([FromBody] User user)
+        {
+           
+
+            // Kiểm tra xem email đã tồn tại chưa
+            var existingUser = await db.Users
+                                       .Where(u => u.Email == user.Email)
+                                       .FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                return Json(new { success = false, message = "Email đã tồn tại." });
+            }
+
+            // Tạo người dùng mới
+            var newUser = new User
+            {
+                Username = user.Username,
+                Password = user.Password,
+                RoleId = user.RoleId,
+                Email = user.Email,
+                DateOfBirth = user.DateOfBirth,
+                PhoneNumber = user.PhoneNumber
+            };
+
+            // Thêm người dùng vào cơ sở dữ liệu
+            db.Users.Add(newUser);
+            await db.SaveChangesAsync();
+
+            // Trả về JSON thông báo thành công
+            return Json(new { success = true, message = "Thêm nhân viên thành công." });
+        }
+
+
+        [HttpGet]
+        [Route("EditStaff/{id}")]
+        public async Task<IActionResult> EditStaff(int id)
+        {
+            var user = await db.Users
+                                .Include(u => u.Role) // Include Role data if needed
+                                .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Roles = new List<object>
+    {
+        new { RoleId = 2, RoleName = "Cashier" },
+        new { RoleId = 3, RoleName = "Staff" }
+    };
+
+            return View(user); // Passing the user to the view for editing
+        }
+
+        [HttpPost]
+        [Route("EditStaff/{id}")]
+        public async Task<IActionResult> EditStaff(int id, [FromBody] User updatedUser)
+        {
+            if (id != updatedUser.UserId)
+            {
+            
+                return BadRequest();
+            }
+
+      
+            if (id != updatedUser.UserId)
+            {
+                return BadRequest();
+            }
+
+            var user = await db.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Cập nhật thông tin người dùng
+            user.Username = updatedUser.Username;
+            user.Password = updatedUser.Password;
+            user.RoleId = updatedUser.RoleId;
+            user.Email = updatedUser.Email;
+            user.DateOfBirth = updatedUser.DateOfBirth;
+            user.PhoneNumber = updatedUser.PhoneNumber;
+
+            // Lưu thay đổi
+            await db.SaveChangesAsync();
+
+            // Log response to check
+            var response = new { success = true, message = "Cập nhật nhân viên thành công." };
+            
+
+            return Json(response);
+        }
+
+
+
+        [HttpPost]
+        [Route("DeleteStaff/{id}")]
+        public async Task<IActionResult> DeleteStaff(int id)
+        {
+            var user = await db.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Remove the user from the database
+            db.Users.Remove(user);
+            await db.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Xóa nhân viên thành công." });
+        }
+
+
+
+        [HttpGet]
+        [Route("ChangePassword")]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        [Route("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+          
+            // Kiểm tra tính hợp lệ của dữ liệu
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("Dữ liệu không hợp lệ.");
+                return View(model);
+            }
+
+            try
+            {
+                // Lấy email của người dùng từ Claims
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    Console.WriteLine("Không thể xác định email người dùng.");
+                    ModelState.AddModelError(string.Empty, "*Không thể xác định email người dùng.");
+                    return View(model);
+                }
+
+                // Tìm người dùng dựa trên email
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
+                if (user == null)
+                {
+                    Console.WriteLine("Người dùng không tồn tại.");
+                    ModelState.AddModelError(string.Empty, "*Người dùng không tồn tại.");
+                    return View(model);
+                }
+
+                // Kiểm tra mật khẩu hiện tại
+                if (user.Password != model.CurrentPassword)
+                {
+                    Console.WriteLine("Mật khẩu hiện tại không đúng.");
+                    ModelState.AddModelError(string.Empty, "*Mật khẩu hiện tại không đúng.");
+                    return View(model);
+                }
+
+                // Kiểm tra xác nhận mật khẩu mới
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    Console.WriteLine("Xác nhận mật khẩu không khớp.");
+                    ModelState.AddModelError(string.Empty, "*Xác nhận mật khẩu mới không khớp.");
+                    return View(model);
+                }
+
+                // Cập nhật mật khẩu mới
+                user.Password = model.NewPassword; // Không mã hóa mật khẩu (không an toàn, chỉ dùng thử nghiệm)
+                Console.WriteLine($"Mật khẩu mới được cập nhật: {user.Password}");
+
+                // Lưu thay đổi
+                await db.SaveChangesAsync();
+
+                // Hiển thị thông báo thành công
+                ViewBag.Success = "Đổi mật khẩu thành công!";
+               
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi trong quá trình đổi mật khẩu: {ex.Message}");
+                // Hiển thị thông báo lỗi
+                ModelState.AddModelError(string.Empty, "*Đã xảy ra lỗi trong quá trình đổi mật khẩu.");
+            }
+
+            return View(model);
+        }
+
+
+
     }
 }

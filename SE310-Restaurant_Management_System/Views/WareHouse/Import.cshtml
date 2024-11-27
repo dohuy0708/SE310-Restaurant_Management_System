@@ -28,9 +28,9 @@
     <button type="button" class="btn btn-primary btn-md" onclick="location.href='@Url.Action("CreateImport", "WareHouse")'">Nhập Kho</button>
 </div>
 
-<table class="table table-hover table-striped" style="position:relative">
+<table class="table table-striped" style="position:relative">
     <thead>
-        <tr>
+        <tr >
             <th>Mã Đơn</th>
             <th>Ngày Nhập</th>
             <th>Mô tả</th>
@@ -59,7 +59,7 @@
 @foreach (var entry in Model)
 {
     <div class="modal fade" id="viewModal-@entry.EntryId" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel-@entry.EntryId" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-lg" role="document" style="width: 60%;">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title text-center w-100" id="viewModalLabel-@entry.EntryId">THÔNG TIN ĐƠN NHẬP KHO</h3>
@@ -67,14 +67,14 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" id="invoiceDetailsContent">
                     <p><strong>Mã Đơn:</strong> @entry.EntryId</p>
                     <p><strong>Ngày Nhập:</strong> @entry.EntryDate.ToShortDateString()</p>
                     <p><strong>Mô tả:</strong> @entry.Description</p>
                     <p><strong>Tổng Tiền:</strong> @entry.TotalPrice</p>
 
                     <h6>Chi Tiết Đơn Hàng:</h6>
-                    <table class="table table-danger" style="border: 1px solid silver;">
+                    <table class="table table-striped" style="border: 1px solid silver;">
                         <thead style="border-bottom: 2px solid silver;">
                             <tr>
 
@@ -88,7 +88,7 @@
                         <tbody>
                             @foreach (var detail in entry.EntryDetails)
                             {
-                                <tr class="table-warning">
+                                <tr  >
                                      
                                     <td>@detail.IngredientId</td>
                                     <td>@detail.IngredientName</td> <!-- Display IngredientName here -->
@@ -102,11 +102,16 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                 
+                    <button type="button" id="printInvoiceButton" class="btn btn-primary" onclick="downloadInvoice()" >In hóa đơn</button>
+
                 </div>
             </div>
         </div>
     </div>
 }
+
+
 
 <div class="pagination-container text-center mt-4">
     @Html.PagedListPager(Model, page => Url.Action("Import", new { page, selectedDate = ViewBag.SelectedDate }), new PagedListRenderOptions
@@ -120,3 +125,49 @@
 })
 </div>
 
+
+<script>
+    function downloadInvoice() {
+        const invoiceContent = document.getElementById('invoiceDetailsContent').innerHTML;
+
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.body.innerHTML = `
+                <html>
+                    <head>
+                        <title>Hoshi Restaurant</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                width: 600px;
+                                margin: 0 auto;
+                            }
+                            h1 {
+                                text-align: center;
+                            }
+                            table {
+                                width: 100%;
+                                border-collapse: collapse;
+                            }
+                            table, th, td {
+                                border: 1px solid black;
+                            }
+                            th, td {
+                                padding: 8px;
+                                text-align: center;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Hóa đơn</h1>
+            `;
+            printWindow.document.body.innerHTML += invoiceContent;
+            printWindow.document.close();
+            printWindow.print();
+
+        } else {
+            alert('Pop-up bị chặn! Hãy kiểm tra cài đặt trình duyệt.');
+        }
+
+    }
+  </script>

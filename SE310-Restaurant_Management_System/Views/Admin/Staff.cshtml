@@ -9,6 +9,135 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 <div>
-    @await Html.PartialAsync("_Staff", Model)
+
+    <h1>Quản lý nhân viên</h1>
+    <div class="d-flex mb-2">
+        <button type="button" class="btn   btn-success  ms-auto" onclick="location.href='@Url.Action("CreateStaff", "Admin")'">Thêm nhân viên</button>
+    </div>
+    <table class="table table-danger" style="position:relative;  width: 100%;">
+        <thead>
+            <tr>
+                <th style="width: 20%;">Tên</th>
+                <th style="width: 20%;">Ngày sinh</th>
+                <th style="width: 20%;">SDT</th>
+                <th style="width: 15%;">Vai trò</th>
+                <th style="width: 25%;"> </th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="table-warning">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Username)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateOfBirth)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PhoneNumber)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Role.RoleName)
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#viewUserModal-@item.UserId">Tài khoản</button>
+                            <button class="btn btn-sm btn-warning" onclick="window.location.href='@Url.Action("EditStaff", "Admin", new { id = item.UserId })'">Sửa</button>
+
+                            <button class="btn btn-sm btn-danger" onclick="confirmDelete(@item.UserId)">Xóa</button>
+                        </div>
+                    </td>
+                </tr>
+
+            }
+
+        </tbody>
+    </table>
+    @foreach (var item in Model)
+    {
+        <div class="modal fade" id="viewUserModal-@item.UserId" tabindex="-1" role="dialog" aria-labelledby="viewUserModalLabel-@item.UserId" aria-hidden="true">
+            <div class="modal-dialog modal-sm" style="max-width:500px" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title text-center w-100" id="viewUserModalLabel-@item.UserId">THÔNG TIN TÀI KHOẢN</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Tên:</strong> @item.Username</p>
+                      
+                        <p><strong>Vai trò:</strong> @item.Role.RoleName</p>
+                        <p><strong>Email:</strong> @item.Email</p>
+                        <p><strong>Password:</strong> @item.Password</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <script>
+        function confirmDelete(userId) {
+            Swal.fire({
+                title: 'Bạn có chắc chắn muốn xóa?',
+                text: "Bạn sẽ không thể khôi phục lại dữ liệu này!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Xóa!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Admin/DeleteStaff/' + userId,
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Đã xóa!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 2000, // Hiển thị trong 2 giây
+                                    showConfirmButton: false // Tự động đóng sau thời gian quy định
+                                }).then(() => {
+                                    location.reload(); // Tải lại trang sau khi hộp thoại đóng
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Lỗi',
+                                    text: response.message,
+                                    icon: 'error',
+                                    timer: 3000, // Hiển thị trong 3 giây
+                                    showConfirmButton: false
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+    </script>
+
+ 
+    <div class="pagination-container text-center mt-4">
+        @Html.PagedListPager(Model, page => Url.Action("Staff", new { page }), new PagedListRenderOptions
+   {
+       DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+       DisplayLinkToLastPage = PagedListDisplayMode.Always,
+       DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+       DisplayLinkToNextPage = PagedListDisplayMode.Always,
+       LiElementClasses = new List<string> { "page-item" },
+       PageClasses = new List<string> { "page-link" }
+   })
+    </div>
+
 </div>
 
