@@ -1,8 +1,230 @@
-﻿
+﻿@model SE310_Restaurant_Management_System.Models.StatisticViewModel
+
 @{
     ViewData["Title"] = "Statistic";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Statistic</h1>
+<style>
+    .form-control, select{
+        padding: 8px 12px;
+    }
 
+    
+</style>
+<div class="container-fluid mt-4">
+    <!-- Cards hiển thị thông tin tổng quan -->
+    <div class="row mb-4">
+        <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-danger card-img-holder text-white">
+                <div class="card-body">
+                    <img src="~/assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image">
+                    <h4 class="font-weight-normal mb-3">
+                        Doanh thu hôm nay <i class="mdi mdi-chart-line mdi-24px float-right"></i>
+                    </h4>
+                    <h2 class="mb-5">@Model.CurrentDayRevenue.ToString("N0") VNĐ</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-info card-img-holder text-white">
+                <div class="card-body">
+                    <img src="~/assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image">
+                    <h4 class="font-weight-normal mb-3">
+                        Doanh thu tháng này <i class="mdi mdi-chart-line mdi-24px float-right"></i>
+                    </h4>
+                    <h2 class="mb-5">@Model.CurrentMonthRevenue.ToString("N0") VNĐ</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 stretch-card grid-margin">
+            <div class="card bg-gradient-success card-img-holder text-white">
+                <div class="card-body">
+                    <img src="~/assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image">
+                    <h4 class="font-weight-normal mb-3">
+                        Doanh thu năm này <i class="mdi mdi-chart-line mdi-24px float-right"></i>
+                    </h4>
+                    <h2 class="mb-5">@Model.CurrentYearRevenue.ToString("N0") VNĐ</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form chọn thời gian -->
+    <div class="card mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4 font-weight-bold">Thống kê doanh thu</h5>
+                <form id="statisticForm" method="get" class="row g-4">
+                    <!-- Theo ngày -->
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input mx-0" type="radio" name="periodType" id="dayRadio" value="day" checked>
+                                    <label class="form-check-label fw-bold" for="dayRadio">Theo ngày</label>
+                                </div>
+                                <input type="date" class="form-control mt-2 " id="dateInput" name="date">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Theo tháng -->
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input mx-0" type="radio" name="periodType" id="monthRadio" value="month">
+                                    <label class="form-check-label fw-bold" for="monthRadio">Theo tháng</label>
+                                </div>
+                                <div class="row gx-2 mt-2">
+                                    <div class="col">
+                                        <select class="form-select form-control" id="monthInput" name="month" disabled>
+                                            @for (int i = 1; i <= 12; i++)
+                                            {
+                                                <option value="@i">Tháng @i</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <select class="form-select form-control" id="yearForMonth" name="year" disabled>
+                                            @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 1; i--)
+                                            {
+                                                <option value="@i">@i</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Theo năm -->
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input mx-0" type="radio" name="periodType" id="yearRadio" value="year">
+                                    <label class="form-check-label fw-bold" for="yearRadio">Theo năm</label>
+                                </div>
+                                <select class="form-select mt-2 form-control" id="yearInput" name="year" disabled>
+                                    @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 1; i--)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Submit button -->
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">Xem thống kê</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Biểu đồ -->
+<div class="card">
+    <div class="card-body" id="chartContainer">
+        @await Html.PartialAsync("_chartPartial", Model)
+
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    // Xử lý sự kiện radio buttons
+    document.querySelectorAll('input[name="periodType"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            // Disable tất cả input
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.disabled = true;
+            });
+
+            // Enable input tương ứng
+            switch (this.value) {
+                case 'day':
+                    document.getElementById('dateInput').disabled = false;
+                    break;
+                case 'month':
+                    document.getElementById('monthInput').disabled = false;
+                    document.getElementById('yearForMonth').disabled = false;
+                    break;
+                case 'year':
+                    document.getElementById('yearInput').disabled = false;
+                    break;
+            }
+        });
+    });
+    // Set giá trị mặc định cho date input
+    document.getElementById('dateInput').valueAsDate = new Date();
+    // Set giá trị mặc định cho month input là tháng hiện tại
+    document.getElementById('monthInput').value = new Date().getMonth()+1;
+
+    // Xử lý gửi form bằng AJAX
+    $('#statisticForm').submit(function (e) {
+        e.preventDefault(); // Ngừng gửi form bình thường
+        let data = {
+            date: null,
+            month: null,
+            year: null
+        };
+        // Kiểm tra radio button được chọn và lấy giá trị tương ứng
+        if (document.getElementById("dayRadio").checked) {
+            // Lấy giá trị từ input ngày
+            let dateInput = document.getElementById("dateInput").value;
+            if (dateInput) {
+                // Chuyển đổi giá trị từ input thành Date và định dạng theo chuẩn ISO (YYYY-MM-DD)
+                let date = new Date(dateInput);
+                let formattedDate = date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+                data.date = formattedDate;
+            }
+
+
+        } else if (document.getElementById("monthRadio").checked) {
+            // Lấy giá trị từ input tháng và năm
+            let monthInput = document.getElementById("monthInput").value;
+            let yearForMonth = document.getElementById("yearForMonth").value;
+            if (monthInput && yearForMonth) {
+                data.month = parseInt(monthInput); // Chuyển thành kiểu int
+                data.year = parseInt(yearForMonth); // Chuyển thành kiểu int
+            }
+        } else if (document.getElementById("yearRadio").checked) {
+            // Lấy giá trị từ input năm
+            let yearInput = document.getElementById("yearInput").value;
+            if (yearInput) {
+                data.year = parseInt(yearInput); // Chuyển thành kiểu int
+            }
+        }
+
+        // In ra dữ liệu để kiểm tra
+        console.log(data);
+        $.ajax({
+            url: '@Url.Action("StatisticFilter", "Admin")',
+            data: data,
+            type: 'GET',
+            success: function (response) {
+                // Cập nhật nội dung của chartContainer
+                $('#chartContainer').html(response);
+
+                // Thực thi lại mã JavaScript trong response (vẽ biểu đồ)
+                const scriptTags = $(response).filter('script');
+                scriptTags.each(function () {
+                    eval(this.innerHTML);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.log("Lỗi: ", error);  // Debug lỗi
+            }
+        });
+
+
+    });
+
+
+
+
+</script>

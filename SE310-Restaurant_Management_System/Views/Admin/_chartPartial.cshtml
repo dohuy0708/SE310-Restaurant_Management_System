@@ -1,0 +1,69 @@
+﻿@model SE310_Restaurant_Management_System.Models.StatisticViewModel
+
+<div>
+    <h3 class="card-title">@ViewBag.TotalRevenue</h3>
+    <canvas id="revenueChart"></canvas>
+    <h4 id="chartName" style="padding-left:60px; margin-top:10px; font-weight:bold"  class="text-center">@ViewBag.ChartName</h4>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+    let currentChart = null;
+    function drawChart(type, labels, data, chartType) {
+        if (currentChart) currentChart.destroy();
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const config = {
+            type: type === 'area' ? 'line' : type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: data,
+                    backgroundColor: 'rgba(255, 159, 64,1)',
+                    borderWidth: 1,
+                }]
+            },
+            options: { responsive: true },
+        };
+
+        currentChart = new Chart(ctx, config);
+
+    }
+
+    // Xử lý dữ liệu ban đầu
+    const chartData = {
+        labels: [],
+        data: [],
+        chartType: '' // Thêm thuộc tính này để lưu kiểu thống kê
+    };
+
+    @if (Model.RevenueByDay?.Any() == true)
+    {
+        <text>
+                chartData.labels = [@Html.Raw(string.Join(",", Model.RevenueByDay.Select(x => $"'{x.Period}'")))];
+                chartData.data = [@Html.Raw(string.Join(",", Model.RevenueByDay.Select(x => x.TotalRevenue)))];
+                chartData.chartType = 'day';
+        </text>
+    }
+    else if (Model.RevenueByMonth?.Any() == true)
+    {
+        <text>
+                chartData.labels = [@Html.Raw(string.Join(",", Model.RevenueByMonth.Select(x => $"'{x.Period}'")))];
+                chartData.data = [@Html.Raw(string.Join(",", Model.RevenueByMonth.Select(x => x.TotalRevenue)))];
+                chartData.chartType = 'month';
+        </text>
+    }
+    else if (Model.RevenueByYear?.Any() == true)
+    {
+        <text>
+                chartData.labels = [@Html.Raw(string.Join(",", Model.RevenueByYear.Select(x => $"'{x.Period}'")))];
+                chartData.data = [@Html.Raw(string.Join(",", Model.RevenueByYear.Select(x => x.TotalRevenue)))];
+                chartData.chartType = 'year';
+        </text>
+    }
+
+        // Vẽ biểu đồ ban đầu và hiển thị tên chart
+        drawChart('bar', chartData.labels, chartData.data, chartData.chartType);
+</script>

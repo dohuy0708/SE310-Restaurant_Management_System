@@ -1,0 +1,192 @@
+﻿@{
+    ViewData["Title"] = "CreateStaff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<h1>Thêm nhân viên</h1>
+<div class="card-body">
+    <form id="createStaffForm" method="post">
+        <div class="form-group row">
+            <label for="Username" class="col-sm-3 col-form-label">Tên nhân viên:</label>
+            <div class="col-sm-9">
+                <input type="text" id="Username" name="Username" class="form-control" placeholder="Tên nhân viên">
+                <span class="text-danger" id="UsernameError"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="Email" class="col-sm-3 col-form-label">Email:</label>
+            <div class="col-sm-9">
+
+                <input type="email" id="Email" name="Email" class="form-control" placeholder="Email">
+                <span class="text-danger" id="EmailError"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="Password" class="col-sm-3 col-form-label">Password:</label>
+            <div class="col-sm-9">
+                <input type="text" id="Password" name="Password" class="form-control" placeholder="Password">
+                <span class="text-danger" id="PasswordError"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="RoleId" class="col-sm-3 col-form-label">Vai trò:</label>
+            <div class="col-sm-9">
+                <select id="RoleId" name="RoleId" class="form-control">
+                    <option value="">Chọn vai trò</option>
+                    <option value="2">Cashier</option>
+                    <option value="3">Staff</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="DateOfBirth" class="col-sm-3 col-form-label">Ngày sinh:</label>
+            <div class="col-sm-9">
+                <input type="date" id="DateOfBirth" name="DateOfBirth" class="form-control">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="PhoneNumber" class="col-sm-3 col-form-label">Số điện thoại:</label>
+            <div class="col-sm-9">
+                <input type="text" id="PhoneNumber" name="PhoneNumber" class="form-control" placeholder="Số điện thoại">
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Thêm nhân viên</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/admin/Staff'">Hủy</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById("createStaffForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        // Get form data
+        const username = document.getElementById("Username").value;
+        const password = document.getElementById("Password").value;
+        const roleId = parseInt(document.getElementById("RoleId").value);
+        const email = document.getElementById("Email").value;
+        const dateOfBirth = document.getElementById("DateOfBirth").value;
+        const phoneNumber = document.getElementById("PhoneNumber").value;
+
+        let isValid = true;
+
+        // Clear previous error messages
+        document.getElementById("UsernameError").textContent = "";
+        document.getElementById("EmailError").textContent = "";
+        document.getElementById("PasswordError").textContent = "";
+
+        if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: "Số điện thoại không hợp lệ."
+            });
+            isValid = false;
+        }
+        if (isNaN(Date.parse(dateOfBirth))) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: "Vui lòng nhập ngày sinh hợp lệ."
+            });
+            isValid = false;
+        }
+
+
+        if (!roleId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: "Vui lòng chọn vai trò."
+            });
+            isValid = false;
+        }
+        if (!password || password.length < 8) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: "Vui lòng nhập mật khẩu đúng định dạng"
+            });
+            
+            document.getElementById("PasswordError").textContent = "*Mật khẩu phải có ít nhất 8 ký tự.";
+            isValid = false;
+        }
+        
+        if (!email) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: "Vui lòng nhập Email"
+            });
+            document.getElementById("EmailError").textContent = "*Email không hợp lệ.";
+            isValid = false;
+        }
+
+        // Validate fields
+        if (!username) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: "Vui lòng nhập tên nhân viên."
+            });
+            isValid = false;
+            isValid = false;
+        }
+
+  
+
+      
+   
+   
+        // If validation fails, prevent form submission
+        if (!isValid) return;
+
+        // Prepare data for submission
+        const data = {
+            Username: username,
+            Password: password,
+            RoleId: roleId,
+            Email: email,
+            DateOfBirth: dateOfBirth,
+            PhoneNumber: phoneNumber
+        };
+
+        // Send the data via fetch API
+        fetch('/Admin/CreateStaff', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: data.message,
+                }).then(() => {
+                    window.location.href = '@Url.Action("Staff", "Admin")'; // Redirect to the Staff list page
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thất bại',
+                    text: data.message,
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: error.message,
+            });
+        });
+    });
+</script>

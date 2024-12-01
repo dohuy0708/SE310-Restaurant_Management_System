@@ -16,8 +16,28 @@ namespace SE310_Restaurant_Management_System.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            if (User.Identity.IsAuthenticated)
+            {
+                // Lấy vai trò từ claim của người dùng đã đăng nhập
+                var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+                if (role == "Admin")
+                {
+                    return RedirectToAction("MenuItem", "Admin");
+                }
+                else if (role == "Cashier")
+                {
+                    return RedirectToAction("MenuItem", "Cashier");
+                }
+                else if (role == "Staff")
+                {
+                    return RedirectToAction("Home", "WareHouse");
+                }
+            }
+
+            return View(); // Nếu chưa đăng nhập, hiển thị trang Login
         }
+    
 
         [HttpPost]
         public async Task<IActionResult> Login(AccountViewModel account)
@@ -30,11 +50,17 @@ namespace SE310_Restaurant_Management_System.Controllers
             {
                 Console.WriteLine(user.Email + user.Role.RoleName);
 
+
+                // Ví dụ về cách thêm claim khi đăng nhập người dùng
+
                 var claims = new List<Claim>
-            {
-            new Claim(ClaimTypes.Name, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.RoleName) // Role của người dùng
-            };
+{
+    new Claim(ClaimTypes.Email, user.Email),
+    new Claim(ClaimTypes.Name, user.Username),
+    new Claim(ClaimTypes.Role, user.Role.RoleName),
+};
+
+            
 
                 var identity = new ClaimsIdentity(claims, "CookieAuth");
                 var principal = new ClaimsPrincipal(identity);
@@ -62,8 +88,15 @@ namespace SE310_Restaurant_Management_System.Controllers
 
         public async Task<IActionResult> Logout()
         {
+            // Xóa cookie xác thực
             await HttpContext.SignOutAsync("CookieAuth");
+
+            // Xóa cookie theo tên
+            HttpContext.Response.Cookies.Delete(".AspNetCore.CookieAuth");
+
+            // Điều hướng lại trang login
             return RedirectToAction("Login", "Login");
         }
+
     }
 }

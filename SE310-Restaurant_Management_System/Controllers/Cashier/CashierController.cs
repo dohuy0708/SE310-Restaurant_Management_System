@@ -15,7 +15,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
         }
 
 
-        public IActionResult MenuItem(int? id)
+        public IActionResult MenuItem(int? id, string searchTerm)
         {
             // Lấy danh sách SubCategories từ cơ sở dữ liệu
             var subCategories = db.SubCategories.AsNoTracking().ToList();
@@ -28,13 +28,13 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             });
 
             // Lấy tất cả menuItems
-            var menuItems = db.MenuItems.AsNoTracking();
+            var menuItemsQuery = db.MenuItems.AsNoTracking();
             ViewBag.Name = "Tất cả";
 
             // Nếu id không null và không phải là 0, lọc menuItems theo SubCategoryId
             if (id != null && id != 0)
             {
-                menuItems = menuItems.Where(mi => mi.SubCategoryId == id);
+                menuItemsQuery = menuItemsQuery.Where(mi => mi.SubCategoryId == id);
 
                 // Lấy tên SubCategory cho ViewBag.Name nếu có id hợp lệ
                 var subCategory = subCategories.FirstOrDefault(sC => sC.SubCategoryId == id);
@@ -44,9 +44,19 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
                 }
             }
 
+            // Xử lý tìm kiếm
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                menuItemsQuery = menuItemsQuery.Where(mi => mi.Name.Contains(searchTerm)); ;
+            }
+
+            // Truyền SubCategories và searchTerm cho view
             ViewBag.SubCategories = subCategories;
-            return View(menuItems.ToList());
+            ViewBag.SearchTerm = searchTerm;
+
+            return View(menuItemsQuery.ToList());
         }
+
 
         public IActionResult Tables()
         {
@@ -56,7 +66,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             // Thêm mục "Tất cả" vào đầu danh sách
             subCategories.Insert(0, new SubCategory
             {
-                SubCategoryId = 0, 
+                SubCategoryId = 0,
                 SubCategoryName = "Tất cả"
             });
             ViewBag.SubCategories = subCategories;
@@ -84,17 +94,17 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             {
                 menuItems = menuItems.Where(mi => mi.SubCategoryId == id);
             }
-                return PartialView("_MenuItemsPartial", menuItems.ToList());
+            return PartialView("_MenuItemsPartial", menuItems.ToList());
         }
 
-            public IActionResult BookingOrder()
-            {
-                var orders = db.BookingOrders.AsNoTracking().ToList();
-                return View(orders);
-            }
+        public IActionResult BookingOrder()
+        {
+            var orders = db.BookingOrders.AsNoTracking().ToList();
+            return View(orders);
+        }
         [HttpGet]
         public IActionResult Booking(int? tableId)
-        {           
+        {
             // Lấy danh sách bàn trống từ cơ sở dữ liệu
             var tables = db.RestaurantTables.Where(p => p.StatusId == 2).ToList();
 
@@ -372,19 +382,36 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             return PartialView("_InvoicesPartial", invoices.ToList());
         }
         public IActionResult GetInvoiceDetails(int id)
-{
-    var invoice = db.Invoices
-                    .Include(i => i.InvoiceItems)
-                    .ThenInclude(ii => ii.MenuItem) // Include thông tin menu item nếu có
-                    .FirstOrDefault(i => i.InvoiceId == id);
+        {
+            var invoice = db.Invoices
+                            .Include(i => i.InvoiceItems)
+                            .ThenInclude(ii => ii.MenuItem) // Include thông tin menu item
+                            .FirstOrDefault(i => i.InvoiceId == id);
 
-    if (invoice == null)
-    {
-        return NotFound("Không tìm thấy hóa đơn.");
-    }
+            if (invoice == null)
+            {
+                return NotFound("Không tìm thấy hóa đơn.");
+            }
 
-    return PartialView("_InvoiceDetailsPartial", invoice);
-}
+            // Nhóm các mục hóa đơn theo món ăn
+            var groupedItems = invoice.InvoiceItems
+                .GroupBy(ii => ii.MenuItem)
+                .Select(group => new InvoiceItemViewModel
+                {
+                    MenuItemName = group.Key.Name, // Tên món ăn
+                    Quantity = group.Sum(ii => ii.Quantity), // Tổng số lượng
+                    Price = group.Key.Price, // Giá món
+                    TotalPrice = group.Sum(ii => ii.Quantity * group.Key.Price) // Tổng giá tiền
+                })
+                .ToList();
+
+            // Truyền danh sách món ăn đã gộp vào ViewData
+            ViewData["GroupedInvoiceItems"] = groupedItems;
+
+            return PartialView("_InvoiceDetailsPartial", invoice);
+        }
+
+
 
         public IActionResult GetInvoiceDetailsByTableId(int tableId)
         {
@@ -398,10 +425,26 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
             {
                 return NotFound("Không tìm thấy hóa đơn chưa thanh toán cho bàn này.");
             }
-            ViewData["InvoiceId"] = invoice.InvoiceId;
-            return PartialView("_InvoiceDetailsPartial", invoice); // Trả về PartialView chứa hóa đơn tìm được
 
+            // Nhóm các mục hóa đơn theo món ăn
+            var groupedItems = invoice.InvoiceItems
+                 .GroupBy(ii => ii.MenuItem)
+                 .Select(group => new InvoiceItemViewModel
+                 {
+                     MenuItemName = group.Key.Name, // Tên món ăn
+                     Quantity = group.Sum(ii => ii.Quantity), // Tổng số lượng
+                     Price = group.Key.Price, // Giá món
+                     TotalPrice = group.Sum(ii => ii.Quantity * group.Key.Price) // Tổng giá tiền
+                 })
+                 .ToList();
+
+            // Truyền danh sách món ăn đã gộp vào ViewData
+            ViewData["GroupedInvoiceItems"] = groupedItems;
+            ViewData["InvoiceId"] = invoice.InvoiceId; // Truyền InvoiceId để hiển thị trong view nếu cần
+
+            return PartialView("_InvoiceDetailsPartial", invoice); // Trả về PartialView chứa hóa đơn tìm được
         }
+
 
     }
 }

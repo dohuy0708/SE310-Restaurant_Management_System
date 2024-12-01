@@ -5,7 +5,7 @@
 }
 
 <div class="card-body">
-    <h4 class="card-title">ĐƠN NHẬP KHO</h4>
+    <h2  >ĐƠN NHẬP KHO</h2>
     <form class="form-sample" id="purchaseOrderForm">
         <div class="row">
             <div class="col-md-6">
@@ -94,7 +94,7 @@
                             `).join('')}
                         </select>
                     </td>
-                    <td><input type="text" class="form-control unit" readonly></td>
+                    <td><input type="text" class="form-control unit" ></td>
                     <td><input type="number" class="form-control price" placeholder="Đơn giá" required onchange="calculateTotal(this)"></td>
                         <td><input type="number" class="form-control quantity" placeholder="Số lượng"   required min="1" oninput="checkQuantity(this)" onchange="calculateTotal(this)"></td>
                     <td><input type="text" class="form-control total" readonly></td>

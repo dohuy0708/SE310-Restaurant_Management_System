@@ -3,7 +3,7 @@
 
 <h1>QuanLyNhanVien</h1>
 
-<table class="table table-striped" style="position:relative">
+<table class="table table-danger" style="position:relative">
     <thead>
         <tr>
             <th> Username </th>
@@ -16,7 +16,7 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
+            <tr class="table-warning">
                 <td>
                     @Html.DisplayFor(modelItem => item.Username)
                 </td>
@@ -36,11 +36,16 @@
     </tbody>
 </table>
 
-<div class="page-list" style="position:fixed; top:660px; height:100px">
-    @Html.PagedListPager(Model, page => Url.Action("Staff", new { page = page }), new PagedListRenderOptions()
+<div class="pagination-container text-center mt-4">
+    @Html.PagedListPager(Model, page => Url.Action("Staff", new { page }), new PagedListRenderOptions
 {
-    LiElementClasses = new List<String> { "page-item" },
-    PageClasses = new List<String> { "page-link" }
+    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+    LiElementClasses = new List<string> { "page-item" },
+    PageClasses = new List<string> { "page-link" }
 })
 </div>
+
 
