@@ -1,0 +1,183 @@
+﻿@using SE310_Restaurant_Management_System.ViewModels
+@model ComboViewModel
+@{
+    ViewData["Title"] = "AddNewCombo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <link rel="stylesheet" href="~/assets/css/combo.css" />
+</head>
+
+<h1>AddNewCombo</h1>
+
+<form method="post">
+    <div class="container">
+        <div class="left-panel">
+            <h2>Ảnh mặt hàng</h2>
+            <div class="image-preview">
+                <img src="#" alt="Ảnh mặt hàng" id="preview">
+            </div>
+            <button class="upload-btn">Chọn ảnh</button>
+            <p class="note">Dung lượng file tối đa 1 MB<br>Định dạng: .JPEG, .PNG<br>Nên sử dụng hình ảnh có tỉ lệ 1:1</p>
+        </div>
+
+        <div class="right-panel">
+            <div class="form-group">
+                <label for="menu-name">Tên Combo (*)</label>
+                <input type="text" id="menu-name" name="ComboName" placeholder="Nhập tên Combo" required>
+            </div>
+
+            <div class="form-group">
+                <label>Giá bán combo (*)</label>
+                <input type="number" name="ComboPrice" placeholder="VD: 1.000.000 đ" required>
+            </div>
+
+            <div class="form-group">
+                <label>Giá gốc</label>
+                <input type="number" id="original-price" name="OriginalPrice" disabled>
+            </div>
+
+            <button id="addMenuItemBtn" class="add-item-btn">Thêm món ăn</button>
+
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%">Tên món ăn</th>
+                        <th style="width: 20%">Giá bán</th>
+                        <th style="width: 20%">Số lượng</th>
+                        <th style="width: 10%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    </tr>
+                </tbody>
+            </table>
+
+            <input type="hidden" id="selectedItemsInput" name="SelectedMenuItems" value="" />
+            <button class="save-btn">Lưu lại</button>
+            <button class="back-btn">Quay lại</button>
+        </div>
+    </div>
+
+</form>
+
+
+
+<!-- Modal -->
+<div id="menuItemsPopup" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn món ăn</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="menuItemsContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveSelectedMenuItems">Lưu</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#addMenuItemBtn").on("click", function () {
+            $.ajax({
+                url: '/Admin/GetMenuItems',
+                type: 'GET',
+                success: function (data) {
+                    $("#menuItemsContent").html(data); // Load partial view vào popup
+                    $("#menuItemsPopup").modal("show"); // Hiển thị popup
+                },
+                error: function () {
+                    alert("Không thể tải danh sách món ăn.");
+                }
+            });
+        });
+
+        $("#saveSelectedMenuItems").on("click", function () {
+            let selectedItems = [];
+            let totalPrice = 0;
+            $(".menu-item-checkbox:checked").each(function () {
+                // Lấy ID của món ăn được chọn
+                selectedItems.push($(this).data("id"));
+
+                //totalPrice += parseFloat($(this).data("price"));
+
+                // Lấy giá trị data-price và đảm bảo nó là số
+                let price = $(this).data("price");
+
+                // Kiểm tra giá trị của data-price trước khi cộng dồn
+                console.log("Price of selected item: ", price); // Kiểm tra giá trị
+
+                // Nếu giá trị hợp lệ, cộng vào totalPrice
+                if (!isNaN(price)) {
+                    selectedItems.push($(this).data("id"));
+                    totalPrice += parseFloat(price);  // Chuyển giá trị thành số thực và cộng dồn
+                } else {
+                    console.warn("Invalid price value:", price); // Nếu giá trị không hợp lệ
+                }
+            });
+
+            console.log("Total Price: ", totalPrice);
+            $("#original-price").val(totalPrice);
+
+            // Hiển thị danh sách món ăn đã chọn lên bảng ở view chính
+            $.ajax({
+                url: '/Admin/GetSelectedMenuItems', // Route trả về thông tin món ăn đã chọn
+                type: 'POST',
+                data: { selectedItemIds: selectedItems },
+                traditional: true, // Để gửi mảng đơn giản
+                success: function (data) {
+                    // Render danh sách món ăn được chọn trong view chính
+                    $("table.item-table tbody").html(data);
+                    $("#menuItemsPopup").modal("hide"); // Đóng popup
+                },
+                error: function () {
+                    alert("Không thể hiển thị món ăn đã chọn.");
+                }
+            });
+
+            // Cập nhật giá gốc
+            $("#original-price").val(totalPrice); // Cập nhật giá gốc vào input
+
+            $("#menuItemsPopup").modal("hide"); // Đóng popup
+        });
+
+        // Đóng modal khi click nút "Đóng"
+        $(".btn-secondary").on("click", function () {
+            $("#menuItemsPopup").modal("hide"); // Ẩn modal
+        });
+
+        // Đóng modal khi click nút "X"
+        $(".close").on("click", function () {
+            $("#menuItemsPopup").modal("hide"); // Ẩn modal
+        });
+    });
+
+    $(document).on("input", ".quantity-input", function () {
+        let totalPrice = 0;
+        $("table.item-table tbody tr").each(function () {
+            let price = $(this).find("td:eq(1)").text(); // Lấy giá món ăn
+            let quantity = $(this).find(".quantity-input").val(); // Lấy số lượng
+            totalPrice += parseFloat(price) * quantity; // Cộng dồn giá món ăn * số lượng
+        });
+
+        console.log("Total Price: ", totalPrice);
+
+        // Cập nhật giá gốc
+        $("#original-price").val(totalPrice);
+    });
+
+    $(document).on("click", ".remove-item-btn", function () {
+        $(this).closest("tr").remove(); // Xóa món ăn khỏi bảng
+    });
+</script>

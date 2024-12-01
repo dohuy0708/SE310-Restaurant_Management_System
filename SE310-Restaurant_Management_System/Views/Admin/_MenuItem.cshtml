@@ -1,9 +1,54 @@
 ﻿
 @using X.PagedList.Mvc.Core
 @model X.PagedList.IPagedList<MenuItem>
+@using SE310_Restaurant_Management_System
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 
-<div>
+<h2>Quản lý món ăn</h2>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+    <div class="col-md-4">
+        <!-- Adjust the column size as needed (e.g., col-md-4 for a narrower form) -->
+        <form class="d-flex align-items-center h-100" method="get" asp-action="MenuItem">
+            <div class="input-group">
+                <!-- Search button -->
+                <div class="input-group-prepend bg-transparent">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="mdi mdi-magnify"></i>
+                    </button>
+                </div>
+                <!-- Search input with custom styles -->
+                <input type="text" class="form-control bg-transparent"
+                       placeholder="Tìm kiếm tên nguyên liệu" name="searchTerm"
+                       value="@ViewBag.SearchTerm"
+                       style="border: 1px solid #FF7651; height: 34px; padding: 0 12px; font-size: 1em;">
+            </div>
+        </form>
+    </div>
+
+    <!-- Dropdown filter with label and form submission -->
+
+    <!-- Other buttons -->
+    <div>
+        <button type="button" class="btn btn-primary btn-md" onclick="location.href='@Url.Action("AddNewItem", "Admin")'">Thêm món ăn</button>
+    </div>
+</div>
+    <div class="d-flex align-items-center justify-content-left mb-3" style="position:relative">
+        <label for="typeId" style="margin-right: 10px; font-weight: bold;">Loại nguyên liệu:</label>
+        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            @ViewBag.Name
+        </button>
+        <div class="dropdown-menu" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 34px, 0px);" data-popper-placement="bottom-start">
+            <a class="dropdown-item" asp-route-typeId="">Tất cả</a>
+            <a class="dropdown-item" asp-route-typeId="1">Món chính</a>
+            <a class="dropdown-item" asp-route-typeId="2">Món tráng miệng</a>
+            <a class="dropdown-item" asp-route-typeId="3">Thức uống</a>
+        </div>
+    </div>
+
+@* <div>
     <label for="category">Lọc theo danh mục:</label>
     <select id="category" onchange="loadFilteredMenuItem(this.value)">
         <option value="">All</option>
@@ -12,50 +57,78 @@
             <option value="@categoryName">@categoryName</option>
         }
     </select>
+</div> *@
+<div>
+    <table class="table table-striped" id="menuItemsTable">
+        <thead>
+            <tr>
+                <th style="width: 10%">Hình ảnh</th>
+                <th style="width: 20%">Tên món ăn</th>
+                <th style="width: 20">Loại món ăn</th>
+                <th style="width: 30%">Mô tả</th>
+                <th style="width: 5%">Giá</th>
+                <th style="width: 15%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <img src="~/assets/images/foods/@Url.Content(item.Image)"
+                             alt="Image"
+                             width="100"
+                             height="100" />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SubCategory.Category.CategoryName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="edititem" asp-route-id="@item.MenuItemId">Sửa</a>
+                        <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deleteitem" asp-route-id="@item.MenuItemId" onclick="DeleteItem()">Xóa</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
-<table class="table table-striped" id="menuItemsTable">
-    <thead>
-        <tr>
-            <th style="width: 10%">Hình ảnh</th>
-            <th style="width: 20%">Tên món ăn</th>
-            <th style="width: 45%">Mô tả</th>
-            <th style="width: 10%">Giá</th>
-            <th style="width: 15%"></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                <img src="~/assets/images/foods/@Url.Content(item.Image)"
-                        alt="Image"
-                        width="100"
-                        height="100" />
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                    <button class="btn btn-sm btn-warning" onclick="openEditModal(@item.MenuItemId)">Sửa</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteMenuItem(@item.MenuItemId)">Xóa</button>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
 
 
-@* <div class="page-list" style="position:fixed; top:660px;  left:700px ">
+
+<div class="page-list" style="position:fixed; top:600px">
     @Html.PagedListPager(Model, page => Url.Action("MenuItem", new { page = page }), new PagedListRenderOptions()
 {
     LiElementClasses = new List<String> { "page-item" },
     PageClasses = new List<String> { "page-link" }
 })
-</div> *@
+</div>
+
+<script>
+    function DeleteItem() {
+        Swal.fire({
+            title: 'Bạn có chắc chắn muốn hủy đặt bàn?',
+            text: "Hành động này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tìm form theo id và submit
+                document.getElementById(`cancelBookingForm-${bookingOrderId}`).submit();
+            }
+        });
+</script>
+

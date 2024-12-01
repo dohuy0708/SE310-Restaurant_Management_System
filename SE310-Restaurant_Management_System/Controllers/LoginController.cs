@@ -11,9 +11,7 @@ namespace SE310_Restaurant_Management_System.Controllers
 {
     public class LoginController : Controller
     {
-        QlnhaHangContext db = new QlnhaHangContext();
-
-
+        private QlnhaHangContext db = new QlnhaHangContext();
 
         [HttpGet]
         public IActionResult Login()
@@ -52,7 +50,9 @@ namespace SE310_Restaurant_Management_System.Controllers
             {
                 Console.WriteLine(user.Email + user.Role.RoleName);
 
+
                 // Ví dụ về cách thêm claim khi đăng nhập người dùng
+
                 var claims = new List<Claim>
 {
     new Claim(ClaimTypes.Email, user.Email),
@@ -68,26 +68,23 @@ namespace SE310_Restaurant_Management_System.Controllers
                 await HttpContext.SignInAsync("CookieAuth", principal); // Tạo cookie xác thực
 
                 // Điều hướng theo vai trò của người dùng
-                if (user.Role.RoleName == "Admin")
+                if (user.Role.RoleId == 1)
                 {
                     return RedirectToAction("Statistic", "Admin");
                 }
-                else if (user.Role.RoleName == "Cashier")
+                else if (user.Role.RoleId == 2)
                 {
                     return RedirectToAction("MenuItem", "Cashier");
                 }
-                else if (user.Role.RoleName == "Staff")
+                else if (user.Role.RoleId == 3)
                 {
                     return RedirectToAction("Home", "WareHouse");
                 }
-
             }
 
             ViewBag.Error = "*Tên đăng nhập hoặc mật khẩu không đúng.";
             return View();
         }
-
-
 
         public async Task<IActionResult> Logout()
         {
@@ -100,7 +97,6 @@ namespace SE310_Restaurant_Management_System.Controllers
             // Điều hướng lại trang login
             return RedirectToAction("Login", "Login");
         }
-
 
     }
 }

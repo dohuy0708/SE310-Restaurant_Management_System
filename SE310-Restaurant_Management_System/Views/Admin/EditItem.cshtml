@@ -1,0 +1,83 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model MenuItemModel
+
+@{
+    ViewData["Title"] = "EditItem";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="col-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Chỉnh sửa món ăn</h4>
+            <p class="card-description"> Thông tin cơ bản </p>
+            <form method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label>ID</label>
+                    <input class="form-control-plaintext" readonly value="@ViewData["ItemId"]">
+                    <input type="hidden" name="id" value="@ViewData["ItemId"]" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Name">Tên món ăn</label>
+                    <input asp-for="Name" class="form-control">
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div>
+                    <img src="/assets/images/foods/@ViewData["ItemImage"]" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ImagePath">Hình ảnh</label>
+                    <div class="">
+                        <input asp-for="ImagePath" class="file-upload-info" id="customFile" />
+                    <span asp-validation-for="ImagePath" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description">Mô tả</label>
+                    <input asp-for="Description" class="form-control" row="4">
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Price">Giá</label>
+                    <input asp-for="Price" class="form-control" >
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="SubCategoryId">Loại món ăn phụ</label>
+                    <select asp-for="SubCategoryId" class="form-control" asp-items="ViewBag.SubCategoryId">
+                        <option value="">Vui lòng chọn loại món ăn phụ</option>
+                    </select>
+                    <span asp-validation-for="SubCategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+
+                    <input type="submit" class="btn btn-primary"></input>
+                    <a class="btn btn-light" type="button" asp-action="MenuItem">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="../../assets/js/file-upload.js"></script>
+
+<script>
+    function goBack(){
+        window.history.back();
+    }
+
+</script>
+

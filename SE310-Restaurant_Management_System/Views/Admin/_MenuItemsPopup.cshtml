@@ -1,0 +1,29 @@
+﻿<table class="table">
+    <thead>
+        <tr>
+            <th>Chọn</th>
+            <th>Tên món ăn</th>
+            <th>Hình ảnh</th>
+            <th>Giá</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <input type="checkbox" style="width: 20px" class="menu-item-checkbox" data-id="@item.MenuItemID" data-price="@item.Price" />
+                </td>
+                <td>@item.Name</td>
+                <td>
+                    <img src="~/assets/images/foods/@Url.Content(item.Image)"
+                         alt="Image"
+                         width="100"
+                         height="100" />
+                    @*  <img src="@item.Image" alt="@item.Name" style="width: 50px; height: 50px;" /> *@
+                </td>
+                <td>@item.Price</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -54,6 +54,7 @@ public partial class QlnhaHangContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+
         => optionsBuilder.UseSqlServer("Data Source=LAPTOP-JRRAO9EA\\DOHUY;Initial Catalog=QLNhaHang;Integrated Security=True;Encrypt=True;Trust Server Certificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -344,5 +345,7 @@ public partial class QlnhaHangContext : DbContext
         OnModelCreatingPartial(modelBuilder);
     }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    private void OnModelCreatingPartial(ModelBuilder modelBuilder)
+    {
+    }
 }
