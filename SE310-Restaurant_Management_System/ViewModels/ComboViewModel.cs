@@ -2,8 +2,8 @@
 {
     public class ComboViewModel
     {
-        public string TenCombo { get; set; }
-        public decimal GiaCombo { get; set; }
+        public string ComboName { get; set; }
+        public decimal ComboPrice { get; set; }
         public List<MenuItemViewModel> SelectedMenuItems { get; set; }
         public List<MonAnViewModel> MonAns { get; set; } = new List<MonAnViewModel>();
     }

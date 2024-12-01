@@ -272,22 +272,20 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
                 // Lưu combo vào cơ sở dữ liệu
                 var newCombo = new Combo
                 {
-                    ComboName = combo.TenCombo,
-                    ComboPrice = combo.GiaCombo,
+                    ComboName = combo.ComboName,
+                    ComboPrice = combo.ComboPrice,
                 };
 
                 db.Combos.Add(newCombo);
                 db.SaveChanges();
 
                 // Lưu các món ăn trong combo
-                foreach (var item in combo.SelectedMenuItems)
+                foreach (var menuItem in combo.SelectedMenuItems)
                 {
-                    var comboItem = new ComboItem
+                    db.ComboItems.Add(new ComboItem
                     {
-                        ComboId = newCombo.ComboId,
-                        MenuItemId = item.MenuItemID,
-                    };
-                    db.ComboItems.Add(comboItem);
+                        MenuItemId = menuItem.MenuItemID,
+                    });
                 }
 
                 db.SaveChanges();
@@ -297,7 +295,23 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             }
 
             // Nếu model không hợp lệ, trở lại màn hình tạo combo
-            return View("AddCombo", combo);
+            return View(combo);
+        }
+
+        [HttpGet]
+        [Route("deletecombo")]
+        public IActionResult DeleteCombo(int id)
+        {
+            var item = db.Combos.Find(id);
+            if (item == null)
+            {
+                return RedirectToAction("Combo", "Admin");
+            }
+
+            db.Combos.Remove(item);
+            db.SaveChanges(true);
+
+            return RedirectToAction("Combo", "Admin");
         }
 
         // Huy Hoàng
