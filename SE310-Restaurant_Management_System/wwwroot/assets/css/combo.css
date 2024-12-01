@@ -1,0 +1,161 @@
+﻿body {
+    *
+
+{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+}
+
+.left-panel,
+.right-panel {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.left-panel {
+    width: 30%;
+    text-align: center;
+}
+
+.right-panel {
+    width: 65%;
+}
+
+.image-preview {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    .image-preview img {
+        max-height: 100%;
+        max-width: 100%;
+        border-radius: 8px;
+    }
+
+.upload-btn {
+    margin: 10px 0;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .upload-btn:hover {
+        background-color: #0056b3;
+    }
+
+.note {
+    font-size: 12px;
+    color: #666;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.add-item-btn {
+    display: block;
+    margin: 10px 0 20px;
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .add-item-btn:hover {
+        background-color: #218838;
+    }
+
+.item-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+    .item-table th,
+    .item-table td {
+        text-align: left;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .item-table img {
+        width: 50px;
+        height: 50px;
+        border-radius: 5px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+.delete-btn {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+    .delete-btn:hover {
+        background-color: #c82333;
+    }
+
+.save-btn,
+.back-btn {
+    padding: 10px 15px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background-color: #007bff;
+    color: #fff;
+}
+
+    .save-btn:hover {
+        background-color: #0056b3;
+    }
+
+.back-btn {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+    .back-btn:hover {
+        background-color: #5a6268;
+    }
+}

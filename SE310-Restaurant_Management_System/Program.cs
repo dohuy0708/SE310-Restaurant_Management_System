@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-
 // Thêm dịch vụ xác thực dựa trên cookie
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", config =>
@@ -20,7 +19,6 @@ builder.Services.AddAuthentication("CookieAuth")
 var connectionString = builder.Configuration.GetConnectionString("QlnhaHangContext");
 
 builder.Services.AddDbContext<QlnhaHangContext>(x => x.UseSqlServer(connectionString));
-
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -45,5 +43,3 @@ app.MapControllerRoute(
     pattern: "{controller=Login}/{action=Login}/{id?}");
 
 app.Run();
-
-

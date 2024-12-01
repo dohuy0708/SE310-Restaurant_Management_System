@@ -57,31 +57,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             ViewBag.SearchTerm = searchTerm;
 
             return View(list);
-
-            /* if (!string.IsNullOrEmpty(categoryName))
-             {
-                 listMA = (IOrderedQueryable<MenuItem>)listMA.Where(x => x.SubCategory.Category.CategoryName == categoryName);
-             }
-
-             PagedList<MenuItem> list = new PagedList<MenuItem>(listMA, pageNumber, pageSize);
-
-             var distinctCategories = db.MenuItems
-                                .AsNoTracking()
-                                .Select(i => i.SubCategory.Category.CategoryName)
-                                .Distinct()
-                                .ToList();
-
-             var distinctSubCategories = db.MenuItems
-                                .AsNoTracking()
-                                .Include(i => i.SubCategory)
-                                .Select(i => i.SubCategory.SubCategoryName)
-                                .Distinct()
-                                .ToList();
-
-             ViewBag.Distinct = distinctCategories;
-             ViewBag.DistinctSub = distinctSubCategories;
-
-             return View(list);*/
         }
 
         [Route("addnewitem")]
@@ -128,39 +103,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             db.SaveChanges();
 
             return RedirectToAction("MenuItem", "Admin");
-
-            /*if (ModelState.IsValid)
-            {
-                if (itemModel.ImagePath != null)
-                {
-                    string folder = "assets/images/foods/";
-
-                    itemModel.Image = itemModel.ImagePath.FileName;
-
-                    folder += itemModel.ImagePath.FileName;
-                    string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
-
-                    await itemModel.ImagePath.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
-                }
-
-                var menuItem = new MenuItem
-                {
-                    Name = itemModel.Name,
-                    Description = itemModel.Description,
-                    Price = itemModel.Price,
-                    Image = itemModel.ImagePath.FileName,
-                    SubCategoryId = itemModel.SubCategoryId,
-                };
-
-                db.MenuItems.Add(menuItem);
-                await db.SaveChangesAsync();
-
-                return RedirectToAction("MenuItem");
-            }
-
-            ViewBag.SubCategoryId = new SelectList(db.SubCategories.ToList(), "SubCategoryId", "SubCategoryName");
-
-            return View(itemModel);*/
         }
 
         [Route("edititem")]
@@ -235,32 +177,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
 
             db.SaveChanges();
             return RedirectToAction("MenuItem", "Admin");
-
-            /*if (ModelState.IsValid)
-            {
-                var existingItem = await db.MenuItems.FindAsync(item.MenuItemId);
-
-                existingItem.Name = item.Name;
-                existingItem.Description = item.Description;
-                existingItem.Price = item.Price;
-                existingItem.SubCategoryId = item.SubCategoryId;
-
-                if (item.ImagePath != null)
-                {
-                    string folder = "assets/images/foods/";
-
-                    item.Image = item.ImagePath.FileName;
-
-                    folder += item.ImagePath.FileName;
-                    string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
-
-                    await item.ImagePath.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
-                }
-
-                await db.SaveChangesAsync();
-                return RedirectToAction("MenuItem", "Admin");
-            }
-            return View("EditItem", item);*/
         }
 
         [HttpGet]
@@ -281,10 +197,107 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             return RedirectToAction("MenuItem", "Admin");
         }
 
-        [Route("Combo")]
+        [Route("combo")]
         public IActionResult Combo()
         {
+            var combo = db.Combos.ToList();
+            return View(combo);
+        }
+
+        [Route("getmenuitems")]
+        [HttpGet]
+        public IActionResult GetMenuItems()
+        {
+            var menuItems = db.MenuItems
+                .Select(m => new MenuItemViewModel
+                {
+                    MenuItemID = m.MenuItemId,
+                    Name = m.Name,
+                    Image = m.Image,
+                    Price = m.Price,
+                    IsSelected = false
+                }).ToList();
+
+            return PartialView("_MenuItemsPopup", menuItems);
+        }
+
+        [Route("savecomboitems")]
+        [HttpPost]
+        public IActionResult SaveComboItems(int comboId, List<int> MenuItemIds)
+        {
+            foreach (var menuItemId in MenuItemIds)
+            {
+                db.ComboItems.Add(new ComboItem
+                {
+                    ComboId = comboId,
+                    MenuItemId = menuItemId,
+                });
+            }
+
+            db.SaveChanges();
+            return Json(new { success = true });
+        }
+
+        [Route("getselectedmenuitems")]
+        [HttpPost]
+        public IActionResult GetSelectedMenuItems(List<int> selectedItemIds)
+        {
+            // Lọc món ăn theo ID đã chọn
+            var selectedMenuItems = db.MenuItems
+                .Where(m => selectedItemIds.Contains(m.MenuItemId)) // Lọc món ăn theo các ID đã chọn
+                .Select(m => new MenuItemViewModel
+                {
+                    MenuItemID = m.MenuItemId,
+                    Name = m.Name,
+                    Price = m.Price
+                }).ToList();
+
+            // Trả về partial view chứa danh sách món ăn đã chọn
+            return PartialView("_SelectedMenuItems", selectedMenuItems);
+        }
+
+        [Route("addnewcombo")]
+        [HttpGet]
+        public IActionResult AddNewCombo()
+        {
             return View();
+        }
+
+        [Route("addnewcombo")]
+        [HttpPost]
+        public IActionResult AddNewCombo(ComboViewModel combo)
+        {
+            if (ModelState.IsValid)
+            {
+                // Lưu combo vào cơ sở dữ liệu
+                var newCombo = new Combo
+                {
+                    ComboName = combo.TenCombo,
+                    ComboPrice = combo.GiaCombo,
+                };
+
+                db.Combos.Add(newCombo);
+                db.SaveChanges();
+
+                // Lưu các món ăn trong combo
+                foreach (var item in combo.SelectedMenuItems)
+                {
+                    var comboItem = new ComboItem
+                    {
+                        ComboId = newCombo.ComboId,
+                        MenuItemId = item.MenuItemID,
+                    };
+                    db.ComboItems.Add(comboItem);
+                }
+
+                db.SaveChanges();
+
+                // Sau khi lưu, chuyển về màn hình chính
+                return RedirectToAction("combo");
+            }
+
+            // Nếu model không hợp lệ, trở lại màn hình tạo combo
+            return View("AddCombo", combo);
         }
 
         // Huy Hoàng

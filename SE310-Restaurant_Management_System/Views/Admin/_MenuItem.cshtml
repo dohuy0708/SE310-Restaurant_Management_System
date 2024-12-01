@@ -33,8 +33,7 @@
     <!-- Other buttons -->
     <div>
         <button type="button" class="btn btn-primary btn-md" onclick="location.href='@Url.Action("AddNewItem", "Admin")'">Thêm món ăn</button>
-@*         <button type="button" class="btn btn-outline-primary btn-md" onclick="location.href='@Url.Action("CreateExport", "WareHouse")'">Xuất Kho</button>
- *@    </div>
+    </div>
 </div>
     <div class="d-flex align-items-center justify-content-left mb-3" style="position:relative">
         <label for="typeId" style="margin-right: 10px; font-weight: bold;">Loại nguyên liệu:</label>
@@ -95,7 +94,7 @@
                     </td>
                     <td>
                         <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="edititem" asp-route-id="@item.MenuItemId">Sửa</a>
-                        <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deleteitem" asp-route-id="@item.MenuItemId">Xóa</a>
+                        <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deleteitem" asp-route-id="@item.MenuItemId" onclick="return confirm('Bạn có chắc chắn xóa?')">Xóa</a>
                     </td>
                 </tr>
             }
