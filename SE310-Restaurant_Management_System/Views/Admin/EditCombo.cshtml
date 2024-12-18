@@ -1,180 +1,23 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "EditCombo";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@using SE310_Restaurant_Management_System.ViewModels
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@model List<SE310_Restaurant_Management_System.Models.MenuItem>
+@model ComboViewModel
 
-<h1>EditCombo</h1>
+<h1>Sửa combo</h1>
 
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-    }
-
-
-    .container {
-        display: flex;
-        gap: 20px;
-    }
-
-    .left-panel,
-    .right-panel {
-        background-color: #fff;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .left-panel {
-        width: 30%;
-        text-align: center;
-    }
-
-    .right-panel {
-        width: 65%;
-    }
-
-    .image-preview {
-        border: 2px dashed #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        height: 200px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-        .image-preview img {
-            max-height: 100%;
-            max-width: 100%;
-            border-radius: 8px;
-        }
-
-    .upload-btn {
-        margin: 10px 0;
-        padding: 10px 15px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-        .upload-btn:hover {
-            background-color: #0056b3;
-        }
-
-    .note {
-        font-size: 12px;
-        color: #666;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    label {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    input[type="text"],
-    input[type="number"] {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-
-    .add-item-btn {
-        display: block;
-        margin: 10px 0 20px;
-        padding: 10px 15px;
-        background-color: #28a745;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-        .add-item-btn:hover {
-            background-color: #218838;
-        }
-
-    .item-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-
-        .item-table th,
-        .item-table td {
-            text-align: left;
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-
-        .item-table img {
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-    .delete-btn {
-        background-color: #dc3545;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 5px 10px;
-    }
-
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-
-    .save-btn,
-    .back-btn {
-        padding: 10px 15px;
-        margin-right: 10px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .save-btn {
-        background-color: #007bff;
-        color: #fff;
-    }
-
-        .save-btn:hover {
-            background-color: #0056b3;
-        }
-
-    .back-btn {
-        background-color: #6c757d;
-        color: #fff;
-    }
-
-        .back-btn:hover {
-            background-color: #5a6268;
-        }
-</style>
+<head>
+    <link rel="stylesheet" href="~/assets/css/combo.css" />
+</head>
 
 <div class="container">
     <div class="left-panel">
-        <h2>Ảnh mặt hàng</h2>
+        <h2>Ảnh Combo</h2>
         <div class="image-preview">
-            <img src="#" alt="Ảnh mặt hàng" id="preview">
+            <img src="~/assets/images/combos/@ViewData["ComboImage"]" alt="Ảnh Combo" id="preview">
         </div>
         <button class="upload-btn">Chọn ảnh</button>
         <p class="note">Dung lượng file tối đa 1 MB<br>Định dạng: .JPEG, .PNG<br>Nên sử dụng hình ảnh có tỉ lệ 1:1</p>
@@ -182,43 +25,168 @@
 
     <div class="right-panel">
         <div class="form-group">
-            <label for="menu-name">Tên thực đơn (*)</label>
-            <input type="text" id="menu-name" placeholder="">
+            <label for="menu-name">Tên Combo (*)</label>
+            <input type="text" id="menu-name" name="ComboName" value="@Model.ComboName" placeholder="Nhập tên Combo" required>
         </div>
 
-        <button class="add-item-btn">Thêm món ăn</button>
+        <div class="form-group">
+            <label>Giá bán combo (*)</label>
+            <input type="number" name="ComboPrice" value="@Model.ComboPrice" placeholder="VD: 1.000.000 đ" required>
+        </div>
 
-        <h3>Món ăn</h3>
+        <div class="form-group">
+            <label>Giá gốc</label>
+            <input type="number" id="original-price" name="OriginalPrice" disabled>
+        </div>
+
+        <h3>Danh sách món ăn trong combo</h3>
+
+        <button id="addMenuItemBtn" class="add-item-btn">Thêm món ăn</button>
+
         <table class="item-table">
             <thead>
                 <tr>
-                    <th>Món ăn</th>
-                    <th>Giá</th>
-                    <th>Danh mục</th>
-                    <th></th>
+                    <th style="width: 50%">Tên món ăn</th>
+                    <th style="width: 20%">Giá bán</th>
+                    <th style="width: 10%"></th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach(var item in Model) 
+            <tbody id="selectedItemsBody">
+                @foreach (var menuItemId in Model.SelectedMenuItems)
                 {
-                    <tr>
-                        <td>
-                            <img src="path/to/image1.jpg" alt="Item 1">
-                            @item.Name
-                        </td>
-                        <td>
-                            @item.Price
-                        </td>
-                        <td>
-                            @item.SubCategory.SubCategoryName
-                        </td>
-                    </tr>
+
                 }
-                
+
+                @if (ViewBag.AllMenuItems != null)
+                {
+                    var selectedMenuItems = ((List<MenuItem>)ViewBag.AllMenuItems)
+                    .Where(m => Model.SelectedMenuItems != null &&
+                    Model.SelectedMenuItems.Contains(m.MenuItemId))
+                    .ToList();
+
+                    foreach (var menuItem in selectedMenuItems)
+                    {
+                        <tr>
+                            <td>@menuItem.Name</td>
+                            <td>@menuItem.Price.ToString("N0") đ</td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm remove-item-btn">Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                }
+
+
+
+
             </tbody>
         </table>
 
+        <input type="hidden" asp-for="SelectedMenuItems" id="selectedItemsInput"
+               value="@string.Join(",", Model.SelectedMenuItems)" />
+
         <button class="save-btn">Lưu lại</button>
-        <button class="back-btn">Quay lại</button>
+        <button class="back-btn" onclick="history.back()">Quay lại</button>
     </div>
 </div>
+
+<!-- Modal -->
+<div id="menuItemsPopup" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn món ăn</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="menuItemsContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveSelectedMenuItems">Lưu</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Xử lý thêm và xóa món ăn 
+        $("#addMenuItemBtn").on("click", function () {
+            $.ajax({
+                url: '/Admin/GetMenuItems',
+                type: 'GET',
+                success: function (data) {
+                    $("#menuItemsContent").html(data); 
+                    $("#menuItemsPopup").modal("show"); 
+                },
+                error: function () {
+                    alert("Không thể tải danh sách món ăn.");
+                }
+            });
+        });
+
+        // Lưu các món ăn đã chọn
+        $("#saveSelectedMenuItems").on("click", function () {
+            let selectedItems = [];
+            let totalPrice = 0;
+            $(".menu-item-checkbox:checked").each(function () {
+                selectedItems.push($(this).data("id"));
+
+                let price = $(this).data("price");
+
+                console.log("Price of selected item: ", price); 
+
+                if (!isNaN(price)) {
+                    totalPrice += parseFloat(price);  
+                } else {
+                    console.warn("Invalid price value:", price); 
+                }
+            });
+
+            console.log("Total Price: ", totalPrice);
+            $("#original-price").val(totalPrice);
+
+            $.ajax({
+                url: '/Admin/GetSelectedMenuItems', 
+                type: 'POST',
+                data: { selectedItemIds: selectedItems },
+                traditional: true, 
+                success: function (data) {
+                    $("table.item-table tbody").html(data);
+                    $("#menuItemsPopup").modal("hide"); 
+                },
+                error: function () {
+                    alert("Không thể hiển thị món ăn đã chọn.");
+                }
+            });
+
+            $("#selectedItemsInput").val(JSON.stringify(selectedItems));
+
+            $("#original-price").val(totalPrice); 
+
+
+        });
+
+        $(document).on("input", function () {
+            let totalPrice = 0;
+            $("table.item-table tbody tr").each(function () {
+                let price = $(this).find("td:eq(1)").text(); 
+                totalPrice += parseFloat(price); 
+            });
+
+            console.log("Total Price: ", totalPrice);
+
+            $("#original-price").val(totalPrice);
+        });
+
+
+        $(document).on("click", ".remove-item-btn", function () {
+            $(this).closest("tr").remove(); 
+        });
+    });
+</script>

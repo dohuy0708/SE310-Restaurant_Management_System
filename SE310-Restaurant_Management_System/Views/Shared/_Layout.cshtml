@@ -164,8 +164,8 @@
                         </a>
                     </li>
                     <!-- Điều kiện hiển thị sidebar theo vai trò người dùng -->
-                    @Html.Partial("_AdminSidebar")
-                    @*        @if (User.IsInRole("Admin"))
+
+                           @if (User.IsInRole("Admin"))
                     {
                         @Html.Partial("_AdminSidebar")
                     }
@@ -176,7 +176,7 @@
                     else if (User.IsInRole("Staff"))
                     {
                         @Html.Partial("_StaffSidebar")
-                    } *@
+                    }
 
 
                 </ul>

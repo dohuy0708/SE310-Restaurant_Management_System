@@ -2,18 +2,10 @@
 {
     public class ComboViewModel
     {
+        public int ComboId { get; set; }
         public string ComboName { get; set; }
         public decimal ComboPrice { get; set; }
-        public List<MenuItemViewModel> SelectedMenuItems { get; set; }
-        public List<MonAnViewModel> MonAns { get; set; } = new List<MonAnViewModel>();
-    }
-
-    public class MonAnViewModel
-    {
-        public int Id { get; set; }
-        public string TenMonAn { get; set; }
-        public decimal Gia { get; set; }
-        public string HinhAnh { get; set; }
-        public int SoLuong { get; set; }
+        public IFormFile? ImagePath { get; set; }
+        public List<int>? SelectedMenuItems { get; set; }
     }
 }
