@@ -37,7 +37,6 @@ namespace SE310_Restaurant_Management_System.Controllers
 
             return View(); // Nếu chưa đăng nhập, hiển thị trang Login
         }
-    
 
         [HttpPost]
         public async Task<IActionResult> Login(AccountViewModel account)
@@ -50,7 +49,6 @@ namespace SE310_Restaurant_Management_System.Controllers
             {
                 Console.WriteLine(user.Email + user.Role.RoleName);
 
-
                 // Ví dụ về cách thêm claim khi đăng nhập người dùng
 
                 var claims = new List<Claim>
@@ -59,8 +57,6 @@ namespace SE310_Restaurant_Management_System.Controllers
     new Claim(ClaimTypes.Name, user.Username),
     new Claim(ClaimTypes.Role, user.Role.RoleName),
 };
-
-            
 
                 var identity = new ClaimsIdentity(claims, "CookieAuth");
                 var principal = new ClaimsPrincipal(identity);
@@ -97,6 +93,5 @@ namespace SE310_Restaurant_Management_System.Controllers
             // Điều hướng lại trang login
             return RedirectToAction("Login", "Login");
         }
-
     }
 }

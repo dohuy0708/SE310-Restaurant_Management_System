@@ -11,10 +11,13 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
 using System.Globalization;
+
 using SE310_Restaurant_Management_System.ViewModels;
 
-namespace SE310_Restaurant_Management_System.Controllers.Admin {
+using Newtonsoft.Json;
 
+namespace SE310_Restaurant_Management_System.Controllers.Admin
+{
     [Route("admin")]
     public class AdminController : Controller
     {
@@ -254,7 +257,9 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
                     MenuItemID = m.MenuItemId,
                     Name = m.Name,
                     Price = m.Price
-                }).ToList();
+                })
+                .Distinct()
+                .ToList();
 
             // Trả về partial view chứa danh sách món ăn đã chọn
             return PartialView("_SelectedMenuItems", selectedMenuItems);
@@ -269,26 +274,44 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
 
         [Route("addnewcombo")]
         [HttpPost]
-        public IActionResult AddNewCombo(ComboViewModel combo)
+        public IActionResult AddNewCombo(ComboViewModel combo, string selectedItemsInput)
         {
+            if (combo.ImagePath == null)
+            {
+                ModelState.AddModelError("ImagePath", "File hình ảnh là bắt buộc");
+            }
+
             if (ModelState.IsValid)
             {
+                string newFileName = combo.ImagePath.FileName;
+
+                string imageFullPath = _webHostEnvironment.WebRootPath + "/assets/images/combos/" + newFileName;
+                using (var stream = System.IO.File.Create(imageFullPath))
+                {
+                    combo.ImagePath.CopyTo(stream);
+                }
+
+                // Chuyển đổi giá trị JSON thành danh sách các đối tượng MenuItemViewModel
+                combo.SelectedMenuItems = JsonConvert.DeserializeObject<List<int>>(selectedItemsInput);
+
                 // Lưu combo vào cơ sở dữ liệu
                 var newCombo = new Combo
                 {
                     ComboName = combo.ComboName,
                     ComboPrice = combo.ComboPrice,
+                    Image = newFileName,
                 };
 
                 db.Combos.Add(newCombo);
                 db.SaveChanges();
 
                 // Lưu các món ăn trong combo
-                foreach (var menuItem in combo.SelectedMenuItems)
+                foreach (var menuItemId in combo.SelectedMenuItems)
                 {
                     db.ComboItems.Add(new ComboItem
                     {
-                        MenuItemId = menuItem.MenuItemID,
+                        ComboId = newCombo.ComboId,
+                        MenuItemId = menuItemId,
                     });
                 }
 
@@ -306,16 +329,69 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
         [Route("deletecombo")]
         public IActionResult DeleteCombo(int id)
         {
-            var item = db.Combos.Find(id);
-            if (item == null)
+            var comboItems = db.ComboItems.Where(ci => ci.ComboId == id).ToList();
+            var combo = db.Combos.Find(id);
+
+            db.ComboItems.RemoveRange(combo.ComboItems);
+
+            db.Combos.Remove(combo);
+
+            db.SaveChanges();
+
+            return RedirectToAction(nameof(Combo));
+        }
+
+        [HttpGet]
+        [Route("editcombo")]
+        public IActionResult EditCombo(int id)
+        {
+            var combo = db.Combos.Include(c => c.ComboItems).FirstOrDefault(c => c.ComboId == id);
+            if (combo == null)
             {
-                return RedirectToAction("Combo", "Admin");
             }
 
-            db.Combos.Remove(item);
-            db.SaveChanges(true);
+            var comboViewModel = new ComboViewModel
+            {
+                ComboName = combo.ComboName,
+                ComboPrice = combo.ComboPrice,
+                SelectedMenuItems = combo.ComboItems.Select(ci => ci.MenuItemId).ToList(),
+            };
 
-            return RedirectToAction("Combo", "Admin");
+            // Lấy danh sách tất cả các menu item để hiển thị
+            ViewBag.AllMenuItems = db.MenuItems.ToList();
+            ViewData["ComboImage"] = combo.Image;
+
+            return View(comboViewModel);
+        }
+
+        [HttpPost]
+        [Route("editcombo")]
+        public IActionResult EditCombo(ComboViewModel combo, string selectedItemsInput)
+        {
+            if (ModelState.IsValid)
+            {
+                var selectedMenuItemIds = JsonConvert.DeserializeObject<List<int>>(selectedItemsInput);
+
+                var existingCombo = db.Combos.Include(c => c.ComboItems).FirstOrDefault(c => c.ComboId == combo.ComboId);
+
+                existingCombo.ComboName = combo.ComboName;
+                existingCombo.ComboPrice = combo.ComboPrice;
+
+                db.ComboItems.RemoveRange(existingCombo.ComboItems);
+                foreach (var menuItemId in selectedMenuItemIds)
+                {
+                    db.ComboItems.Add(new ComboItem
+                    {
+                        ComboId = existingCombo.ComboId,
+                        MenuItemId = menuItemId,
+                    });
+                }
+
+                db.SaveChanges();
+                return RedirectToAction("Combo");
+            }
+
+            return View(combo);
         }
 
         // Huy Hoàng
@@ -329,7 +405,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             {
                 model.RevenueByDay = new List<RevenueData> { GetRevenueByDate(date.Value) };
                 model.ChartType = "day";
-
             }
             else if (month.HasValue && year.HasValue)
             {
@@ -360,6 +435,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             ViewBag.TotalRevenue = "Tổng cộng: " + GetRevenueByDate(DateTime.Today).TotalRevenue.ToString("N0") + " VNĐ";
             return View(model);
         }
+
         [HttpGet]
         public IActionResult StatisticFilter(DateTime? date, int? month, int? year)
         {
@@ -394,7 +470,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
 
                 // Gán vào ViewBag để hiển thị
                 ViewBag.TotalRevenue = "Tổng cộng: " + totalRevenue.ToString("N0") + " VNĐ";
-
             }
             else
             {
@@ -454,8 +529,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             return allDays;
         }
 
-
-
         private List<RevenueData> GetRevenueByMonthsInYear(int year)
         {
             var monthlyRevenue = db.Invoices
@@ -502,8 +575,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             };
         }
 
-
-
         // Lấy doanh thu theo tháng và năm
         public RevenueData GetRevenueByMonth(int year, int month)
         {
@@ -518,8 +589,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
                 TotalRevenue = revenue
             };
         }
-
-
 
         // Lấy doanh thu theo năm
         public List<RevenueData> GetRevenueByYear(int year)
@@ -542,8 +611,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             return revenueByMonth;
         }
 
-
-
         //Hoàng Huy
         [Route("Staff")]
         public IActionResult Staff(int? page)
@@ -557,8 +624,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
                             .Include(i => i.Role)
                             .OrderBy(x => x.UserId);
             PagedList<User> list = new PagedList<User>(listNV, pageNumber, pageSize);
-
-
 
             return View(list);
         }
@@ -576,12 +641,11 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             ViewBag.Roles = roles;
             return View();
         }
+
         [HttpPost]
         [Route("CreateStaff")]
         public async Task<IActionResult> CreateStaff([FromBody] User user)
         {
-           
-
             // Kiểm tra xem email đã tồn tại chưa
             var existingUser = await db.Users
                                        .Where(u => u.Email == user.Email)
@@ -611,7 +675,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             return Json(new { success = true, message = "Thêm nhân viên thành công." });
         }
 
-
         [HttpGet]
         [Route("EditStaff/{id}")]
         public async Task<IActionResult> EditStaff(int id)
@@ -640,11 +703,9 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
         {
             if (id != updatedUser.UserId)
             {
-            
                 return BadRequest();
             }
 
-      
             if (id != updatedUser.UserId)
             {
                 return BadRequest();
@@ -669,12 +730,9 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
 
             // Log response to check
             var response = new { success = true, message = "Cập nhật nhân viên thành công." };
-            
 
             return Json(response);
         }
-
-
 
         [HttpPost]
         [Route("DeleteStaff/{id}")]
@@ -693,8 +751,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             return Json(new { success = true, message = "Xóa nhân viên thành công." });
         }
 
-
-
         [HttpGet]
         [Route("ChangePassword")]
         public IActionResult ChangePassword()
@@ -702,12 +758,10 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
             return View();
         }
 
-
         [HttpPost]
         [Route("ChangePassword")]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-          
             // Kiểm tra tính hợp lệ của dữ liệu
             if (!ModelState.IsValid)
             {
@@ -762,8 +816,6 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
 
                 // Hiển thị thông báo thành công
                 ViewBag.Success = "Đổi mật khẩu thành công!";
-               
-                
             }
             catch (Exception ex)
             {
@@ -774,8 +826,5 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin {
 
             return View(model);
         }
-
-
-
     }
 }

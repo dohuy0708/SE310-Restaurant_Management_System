@@ -94,7 +94,7 @@
                     </td>
                     <td>
                         <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="edititem" asp-route-id="@item.MenuItemId">Sửa</a>
-                        <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deleteitem" asp-route-id="@item.MenuItemId" onclick="DeleteItem()">Xóa</a>
+                        <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deleteitem" asp-route-id="@item.MenuItemId" onclick="return confirm('Bạn có chắc chắn xóa?')">Xóa</a>
                     </td>
                 </tr>
             }
@@ -105,30 +105,10 @@
 
 
 
-<div class="page-list" style="position:fixed; top:600px">
+<div class="page-list" style="position:fixed; top:600px>
     @Html.PagedListPager(Model, page => Url.Action("MenuItem", new { page = page }), new PagedListRenderOptions()
 {
     LiElementClasses = new List<String> { "page-item" },
     PageClasses = new List<String> { "page-link" }
 })
 </div>
-
-<script>
-    function DeleteItem() {
-        Swal.fire({
-            title: 'Bạn có chắc chắn muốn hủy đặt bàn?',
-            text: "Hành động này không thể hoàn tác!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Đồng ý',
-            cancelButtonText: 'Không'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Tìm form theo id và submit
-                document.getElementById(`cancelBookingForm-${bookingOrderId}`).submit();
-            }
-        });
-</script>
-

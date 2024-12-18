@@ -9,16 +9,20 @@
     <link rel="stylesheet" href="~/assets/css/combo.css" />
 </head>
 
-<h1>AddNewCombo</h1>
+<h1>Thêm Combo mới</h1>
 
-<form method="post">
+<form method="post" asp-action="AddNewCombo" asp-controller="Admin" enctype="multipart/form-data">
     <div class="container">
         <div class="left-panel">
-            <h2>Ảnh mặt hàng</h2>
             <div class="image-preview">
-                <img src="#" alt="Ảnh mặt hàng" id="preview">
+                <img src="#" alt="Ảnh Combo" id="preview">
             </div>
-            <button class="upload-btn">Chọn ảnh</button>
+            <label asp-for="ImagePath">Hình ảnh</label>
+            <div class="">
+                <input asp-for="ImagePath" class="file-upload-info" id="customFile" />
+                <span asp-validation-for="ImagePath" class="text-danger"></span>
+            </div>
+
             <p class="note">Dung lượng file tối đa 1 MB<br>Định dạng: .JPEG, .PNG<br>Nên sử dụng hình ảnh có tỉ lệ 1:1</p>
         </div>
 
@@ -35,29 +39,34 @@
 
             <div class="form-group">
                 <label>Giá gốc</label>
-                <input type="number" id="original-price" name="OriginalPrice" disabled>
+                <input type="text" id="original-price" name="OriginalPrice" disabled>
             </div>
 
-            <button id="addMenuItemBtn" class="add-item-btn">Thêm món ăn</button>
+            <div class="form-group">
+                <h3>Danh sách món ăn trong combo</h3>
 
-            <table class="item-table">
-                <thead>
-                    <tr>
-                        <th style="width: 50%">Tên món ăn</th>
-                        <th style="width: 20%">Giá bán</th>
-                        <th style="width: 20%">Số lượng</th>
-                        <th style="width: 10%"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    </tr>
-                </tbody>
-            </table>
+                <button id="addMenuItemBtn" class="add-item-btn">Thêm món ăn</button>
 
-            <input type="hidden" id="selectedItemsInput" name="SelectedMenuItems" value="" />
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Tên món ăn</th>
+                            <th style="width: 20%">Giá bán</th>
+                            <th style="width: 10%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+
+            <input type="hidden" id="selectedItemsInput" name="selectedItemsInput" value="" />
             <button class="save-btn">Lưu lại</button>
-            <button class="back-btn">Quay lại</button>
+            <button class="back-btn" onclick="history.back()">Quay lại</button>
         </div>
     </div>
 
@@ -87,6 +96,7 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="../../assets/js/file-upload.js"></script>
 <script>
     $(document).ready(function () {
         $("#addMenuItemBtn").on("click", function () {
@@ -94,8 +104,8 @@
                 url: '/Admin/GetMenuItems',
                 type: 'GET',
                 success: function (data) {
-                    $("#menuItemsContent").html(data); // Load partial view vào popup
-                    $("#menuItemsPopup").modal("show"); // Hiển thị popup
+                    $("#menuItemsContent").html(data); 
+                    $("#menuItemsPopup").modal("show"); 
                 },
                 error: function () {
                     alert("Không thể tải danh sách món ăn.");
@@ -107,77 +117,68 @@
             let selectedItems = [];
             let totalPrice = 0;
             $(".menu-item-checkbox:checked").each(function () {
-                // Lấy ID của món ăn được chọn
                 selectedItems.push($(this).data("id"));
 
-                //totalPrice += parseFloat($(this).data("price"));
-
-                // Lấy giá trị data-price và đảm bảo nó là số
                 let price = $(this).data("price");
 
-                // Kiểm tra giá trị của data-price trước khi cộng dồn
-                console.log("Price of selected item: ", price); // Kiểm tra giá trị
+                console.log("Price of selected item: ", price); 
 
-                // Nếu giá trị hợp lệ, cộng vào totalPrice
                 if (!isNaN(price)) {
-                    selectedItems.push($(this).data("id"));
-                    totalPrice += parseFloat(price);  // Chuyển giá trị thành số thực và cộng dồn
+                    totalPrice += parseFloat(price); 
                 } else {
-                    console.warn("Invalid price value:", price); // Nếu giá trị không hợp lệ
+                    console.warn("Invalid price value:", price); 
                 }
             });
 
             console.log("Total Price: ", totalPrice);
             $("#original-price").val(totalPrice);
 
-            // Hiển thị danh sách món ăn đã chọn lên bảng ở view chính
             $.ajax({
-                url: '/Admin/GetSelectedMenuItems', // Route trả về thông tin món ăn đã chọn
+                url: '/Admin/GetSelectedMenuItems', 
                 type: 'POST',
                 data: { selectedItemIds: selectedItems },
-                traditional: true, // Để gửi mảng đơn giản
+                traditional: true, 
                 success: function (data) {
-                    // Render danh sách món ăn được chọn trong view chính
                     $("table.item-table tbody").html(data);
-                    $("#menuItemsPopup").modal("hide"); // Đóng popup
+                    $("#menuItemsPopup").modal("hide"); 
                 },
                 error: function () {
                     alert("Không thể hiển thị món ăn đã chọn.");
                 }
             });
 
-            // Cập nhật giá gốc
-            $("#original-price").val(totalPrice); // Cập nhật giá gốc vào input
+            $("#selectedItemsInput").val(JSON.stringify(selectedItems));
 
-            $("#menuItemsPopup").modal("hide"); // Đóng popup
+            $("#original-price").val(totalPrice); 
+
+            $("#menuItemsPopup").modal("hide"); 
         });
 
-        // Đóng modal khi click nút "Đóng"
         $(".btn-secondary").on("click", function () {
-            $("#menuItemsPopup").modal("hide"); // Ẩn modal
+            $("#menuItemsPopup").modal("hide"); 
         });
 
-        // Đóng modal khi click nút "X"
         $(".close").on("click", function () {
-            $("#menuItemsPopup").modal("hide"); // Ẩn modal
+            $("#menuItemsPopup").modal("hide");
         });
+
+
     });
 
     $(document).on("input", ".quantity-input", function () {
         let totalPrice = 0;
         $("table.item-table tbody tr").each(function () {
-            let price = $(this).find("td:eq(1)").text(); // Lấy giá món ăn
-            let quantity = $(this).find(".quantity-input").val(); // Lấy số lượng
-            totalPrice += parseFloat(price) * quantity; // Cộng dồn giá món ăn * số lượng
+            let price = $(this).find("td:eq(1)").text(); 
+            let quantity = $(this).find(".quantity-input").val(); 
+            totalPrice += parseFloat(price) * quantity;
         });
 
         console.log("Total Price: ", totalPrice);
 
-        // Cập nhật giá gốc
         $("#original-price").val(totalPrice);
     });
 
     $(document).on("click", ".remove-item-btn", function () {
-        $(this).closest("tr").remove(); // Xóa món ăn khỏi bảng
+        $(this).closest("tr").remove(); 
     });
 </script>

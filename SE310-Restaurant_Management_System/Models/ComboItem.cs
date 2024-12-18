@@ -9,7 +9,7 @@ public partial class ComboItem
 
     public int? ComboId { get; set; }
 
-    public int? MenuItemId { get; set; }
+    public int MenuItemId { get; set; }
 
     public virtual Combo? Combo { get; set; }
 
