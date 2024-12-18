@@ -1,6 +1,7 @@
 ﻿@model SE310_Restaurant_Management_System.Models.Invoice
 
 <div>
+    <input type="hidden" id="invoiceId" value="@Model.InvoiceId" />
     <p style="display:inline; margin-right:3rem;"><strong>Mã hóa đơn:</strong> @Model.InvoiceId</p>
     <p style="display:inline; margin-right:3rem;"><strong>Bàn:</strong> @Model.TableId</p>
     <p style="display:inline; margin-right:3rem;"><strong>Ngày:</strong> @Model.InvoiceDate.ToString("dd/MM/yyyy")</p>
