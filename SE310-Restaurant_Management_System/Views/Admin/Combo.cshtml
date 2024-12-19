@@ -7,32 +7,17 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @model IEnumerable<Combo>
 
-<head>
-    <link rel="stylesheet" href="~/assets/css/combo.css" />
-</head>
+@* <head>
+     <link rel="stylesheet" href="~/assets/css/combo.css" />
+ </head> *@
 
 <h2>Combo món ăn</h2>
 
 
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <div class="col-md-4">
-        <form class="d-flex align-items-center h-100" method="get" asp-action="MenuItem">
-            <div class="input-group">
-                <div class="input-group-prepend bg-transparent">
-                    <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="mdi mdi-magnify"></i>
-                    </button>
-                </div>
-                <input type="text" class="form-control bg-transparent"
-                       placeholder="Tìm kiếm combo" name="searchTerm"
-                       value="@ViewBag.SearchTerm"
-                       style="border: 1px solid #FF7651; height: 34px; padding: 0 12px; font-size: 1em;">
-            </div>
-        </form>
-    </div>
 
     <div>
-        <button type="button" class="btn btn-primary btn-md" onclick="location.href='@Url.Action("AddNewCombo", "Admin")'">Thêm Combo</button>
+        <button type="button" class="btn btn-primary btn-md mt-2" onclick="location.href='@Url.Action("AddNewCombo", "Admin")'">Thêm Combo</button>
     </div>
 </div>
 
@@ -71,7 +56,13 @@
                         </td>
                         <td>
                             <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="editcombo" asp-route-id="@item.ComboId">Sửa</a>
-                            <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deletecombo" asp-route-id="@item.ComboId" onclick="return confirm('Bạn có chắc chắn xóa?')">Xóa</a>
+                            <form id="deleteComboForm-@item.ComboId" asp-action="DeleteCombo" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken() <!-- Token bảo vệ khỏi tấn công CSRF -->
+                                <input type="hidden" name="comboId" value="@item.ComboId" /> <!-- Sử dụng comboId thay vì id -->
+                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteCombo(@item.ComboId)">Xóa</button>
+                            </form>
+
+
                         </td>
                     </tr>
                 }
@@ -81,3 +72,25 @@
     </table>
 </div>
 
+<script>
+
+    function confirmDeleteCombo(comboId) {
+        // Hiển thị SweetAlert để xác nhận xóa
+        Swal.fire({
+            title: 'Bạn có chắc chắn muốn xóa combo này?',
+            text: "Thao tác này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Submit form để xóa combo
+                document.getElementById(`deleteComboForm-${comboId}`).submit();
+            }
+        });
+    }
+
+
+</script>

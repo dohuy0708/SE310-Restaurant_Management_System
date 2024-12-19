@@ -79,24 +79,36 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
         [HttpPost]
         public IActionResult AddNewItem(MenuItemModel itemModel)
         {
+            // Kiểm tra lỗi nếu không có file hình ảnh
             if (itemModel.ImagePath == null)
             {
                 ModelState.AddModelError("ImagePath", "File hình ảnh là bắt buộc");
             }
 
+            // Kiểm tra lỗi nếu không chọn SubCategoryId
+            var subCategory = db.SubCategories.FirstOrDefault(sc => sc.SubCategoryId == itemModel.SubCategoryId);
+            if (subCategory == null)
+            {
+                ModelState.AddModelError("SubCategoryId", "Loại món ăn không hợp lệ.");
+            }
+
+            // Nếu có lỗi trong ModelState
             if (!ModelState.IsValid)
             {
+                // Truyền lại danh sách SubCategories vào ViewBag
+                ViewBag.SubCategoryId = new SelectList(db.SubCategories.ToList(), "SubCategoryId", "SubCategoryName");
                 return View(itemModel);
             }
 
+            // Xử lý upload hình ảnh
             string newFileName = itemModel.ImagePath.FileName;
-
             string imageFullPath = _webHostEnvironment.WebRootPath + "/assets/images/foods/" + newFileName;
             using (var stream = System.IO.File.Create(imageFullPath))
             {
                 itemModel.ImagePath.CopyTo(stream);
             }
 
+            // Tạo MenuItem mới
             MenuItem menuItem = new MenuItem()
             {
                 Name = itemModel.Name,
@@ -104,6 +116,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
                 Image = newFileName,
                 Price = itemModel.Price,
                 SubCategoryId = itemModel.SubCategoryId,
+                SubCategory = subCategory
             };
 
             db.MenuItems.Add(menuItem);
@@ -111,6 +124,7 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
 
             return RedirectToAction("MenuItem", "Admin");
         }
+
 
         [Route("edititem")]
         [HttpGet]
@@ -150,21 +164,26 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
                 return RedirectToAction("MenuItem", "Admin");
             }
 
+            // Nếu ModelState không hợp lệ
             if (!ModelState.IsValid)
             {
+                // Truyền lại danh sách SubCategories vào ViewBag
+                ViewBag.SubCategoryId = new SelectList(db.SubCategories.ToList(), "SubCategoryId", "SubCategoryName");
+
+                // Truyền lại dữ liệu hình ảnh và ID
                 ViewData["ItemId"] = item.MenuItemId;
                 ViewData["ItemImage"] = item.Image;
 
                 return View(model);
             }
 
+            // Xử lý upload hình ảnh mới
             string newFileName = item.Image;
             if (model.ImagePath != null)
             {
                 newFileName = model.ImagePath.FileName;
 
                 string folder = "/assets/images/foods/";
-
                 string imageFullPath = _webHostEnvironment.WebRootPath + folder + newFileName;
 
                 using (var stream = System.IO.File.Create(imageFullPath))
@@ -172,10 +191,15 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
                     model.ImagePath.CopyTo(stream);
                 }
 
-                string oldIamgeFullPath = _webHostEnvironment.WebRootPath + "/assets/images/foods/" + item.Image;
-                System.IO.File.Delete(oldIamgeFullPath);
+                // Xóa hình ảnh cũ
+                string oldImageFullPath = _webHostEnvironment.WebRootPath + "/assets/images/foods/" + item.Image;
+                if (System.IO.File.Exists(oldImageFullPath))
+                {
+                    System.IO.File.Delete(oldImageFullPath);
+                }
             }
 
+            // Cập nhật dữ liệu món ăn
             item.Name = model.Name;
             item.Description = model.Description;
             item.Image = newFileName;
@@ -186,23 +210,30 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             return RedirectToAction("MenuItem", "Admin");
         }
 
-        [HttpGet]
+
         [Route("deleteitem")]
+
+        [HttpPost]
+        [ValidateAntiForgeryToken] // Thêm bảo vệ CSRF
         public IActionResult DeleteItem(int id)
         {
+            // Tìm món ăn cần xóa
             var item = db.MenuItems.Find(id);
             if (item == null)
             {
-                return RedirectToAction("MenuItem", "Admin");
+                return Json(new { success = false, message = "Không tìm thấy món ăn." });
             }
-            string imageFullPath = _webHostEnvironment.WebRootPath + "/assets/images/foods/" + item.Image;
-            System.IO.File.Delete(imageFullPath);
 
+            // Xóa món ăn khỏi cơ sở dữ liệu
             db.MenuItems.Remove(item);
-            db.SaveChanges(true);
+            db.SaveChanges();
 
+            // Redirect về danh sách món ăn
             return RedirectToAction("MenuItem", "Admin");
         }
+
+
+
 
         [Route("combo")]
         public IActionResult Combo()
@@ -276,87 +307,138 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
         [HttpPost]
         public IActionResult AddNewCombo(ComboViewModel combo, string selectedItemsInput)
         {
+            // Kiểm tra lỗi nếu không có file hình ảnh
             if (combo.ImagePath == null)
             {
                 ModelState.AddModelError("ImagePath", "File hình ảnh là bắt buộc");
             }
 
-            if (ModelState.IsValid)
+            // Kiểm tra nếu ComboName hoặc ComboPrice chưa nhập
+            if (string.IsNullOrEmpty(combo.ComboName))
             {
-                string newFileName = combo.ImagePath.FileName;
-
-                string imageFullPath = _webHostEnvironment.WebRootPath + "/assets/images/combos/" + newFileName;
-                using (var stream = System.IO.File.Create(imageFullPath))
-                {
-                    combo.ImagePath.CopyTo(stream);
-                }
-
-                // Chuyển đổi giá trị JSON thành danh sách các đối tượng MenuItemViewModel
-                combo.SelectedMenuItems = JsonConvert.DeserializeObject<List<int>>(selectedItemsInput);
-
-                // Lưu combo vào cơ sở dữ liệu
-                var newCombo = new Combo
-                {
-                    ComboName = combo.ComboName,
-                    ComboPrice = combo.ComboPrice,
-                    Image = newFileName,
-                };
-
-                db.Combos.Add(newCombo);
-                db.SaveChanges();
-
-                // Lưu các món ăn trong combo
-                foreach (var menuItemId in combo.SelectedMenuItems)
-                {
-                    db.ComboItems.Add(new ComboItem
-                    {
-                        ComboId = newCombo.ComboId,
-                        MenuItemId = menuItemId,
-                    });
-                }
-
-                db.SaveChanges();
-
-                // Sau khi lưu, chuyển về màn hình chính
-                return RedirectToAction("combo");
+                ModelState.AddModelError("ComboName", "Tên Combo không được bỏ trống");
             }
 
-            // Nếu model không hợp lệ, trở lại màn hình tạo combo
-            return View(combo);
-        }
+            if (combo.ComboPrice <= 0)
+            {
+                ModelState.AddModelError("ComboPrice", "Giá Combo phải lớn hơn 0");
+            }
 
-        [HttpGet]
-        [Route("deletecombo")]
-        public IActionResult DeleteCombo(int id)
-        {
-            var comboItems = db.ComboItems.Where(ci => ci.ComboId == id).ToList();
-            var combo = db.Combos.Find(id);
+            // Nếu có lỗi trong ModelState
+            if (!ModelState.IsValid)
+            {
+                return View(combo);
+            }
 
-            db.ComboItems.RemoveRange(combo.ComboItems);
+            // Xử lý upload hình ảnh
+            string newFileName = combo.ImagePath.FileName;
+            string imageDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "assets/images/combos");
 
-            db.Combos.Remove(combo);
+            // Kiểm tra và tạo thư mục nếu chưa có
+            if (!Directory.Exists(imageDirectory))
+            {
+                Directory.CreateDirectory(imageDirectory);
+            }
+
+            string imageFullPath = Path.Combine(imageDirectory, newFileName);
+            using (var stream = System.IO.File.Create(imageFullPath))
+            {
+                combo.ImagePath.CopyTo(stream);
+            }
+
+            // Chuyển đổi giá trị JSON thành danh sách các MenuItemId đã chọn
+            combo.SelectedMenuItems = JsonConvert.DeserializeObject<List<int>>(selectedItemsInput);
+
+            // Tạo Combo mới
+            var newCombo = new Combo
+            {
+                ComboName = combo.ComboName,
+                ComboPrice = combo.ComboPrice,
+                Image = newFileName
+            };
+
+            // Lưu Combo vào cơ sở dữ liệu
+            db.Combos.Add(newCombo);
+            db.SaveChanges();
+
+            // Lưu các món ăn trong combo
+            foreach (var menuItemId in combo.SelectedMenuItems)
+            {
+                db.ComboItems.Add(new ComboItem
+                {
+                    ComboId = newCombo.ComboId,
+                    MenuItemId = menuItemId
+                });
+            }
 
             db.SaveChanges();
 
-            return RedirectToAction(nameof(Combo));
+            // Sau khi lưu, chuyển về màn hình chính
+            return RedirectToAction("Combo", "Admin");
         }
+
+        [Route("deletecombo")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteCombo(int comboId)
+        {
+            try
+            {
+                // Tìm combo cần xóa và lấy thông tin ComboItems liên quan
+                var combo = db.Combos.Include(c => c.ComboItems).FirstOrDefault(c => c.ComboId == comboId);
+                if (combo == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy combo." });
+                }
+
+                // Xóa tất cả ComboItems liên quan đến combo này
+                if (combo.ComboItems.Any())
+                {
+                    db.ComboItems.RemoveRange(combo.ComboItems);  // Xóa các ComboItems liên quan
+                }
+
+                // Sau khi xóa các ComboItems, xóa Combo chính
+                db.Combos.Remove(combo);
+                db.SaveChanges();
+
+                return RedirectToAction("Combo", "Admin");
+
+            }
+            catch (Exception ex)
+            {
+                // Log chi tiết lỗi, bao gồm cả InnerException nếu có
+                string errorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = "Lỗi khi xóa combo: " + errorMessage });
+            }
+        }
+
+
+
 
         [HttpGet]
         [Route("editcombo")]
         public IActionResult EditCombo(int id)
         {
-            var combo = db.Combos.Include(c => c.ComboItems).FirstOrDefault(c => c.ComboId == id);
+            var combo = db.Combos.Include(c => c.ComboItems)
+                                 .ThenInclude(ci => ci.MenuItem) // Lấy thông tin món ăn từ ComboItems
+                                 .FirstOrDefault(c => c.ComboId == id);
+
             if (combo == null)
             {
+                // Nếu không tìm thấy combo, bạn có thể trả về một thông báo lỗi hoặc redirect
+                return NotFound();
             }
+            
+            // Tính giá gốc (OriginalPrice) bằng cách cộng giá các món ăn trong combo
+            var originalPrice = combo.ComboItems.Sum(ci => ci.MenuItem.Price);
 
             var comboViewModel = new ComboViewModel
             {
+                ComboId = combo.ComboId,
                 ComboName = combo.ComboName,
                 ComboPrice = combo.ComboPrice,
                 SelectedMenuItems = combo.ComboItems.Select(ci => ci.MenuItemId).ToList(),
             };
-
             // Lấy danh sách tất cả các menu item để hiển thị
             ViewBag.AllMenuItems = db.MenuItems.ToList();
             ViewData["ComboImage"] = combo.Image;
@@ -364,34 +446,40 @@ namespace SE310_Restaurant_Management_System.Controllers.Admin
             return View(comboViewModel);
         }
 
-        [HttpPost]
+
         [Route("editcombo")]
+        [HttpPost]
         public IActionResult EditCombo(ComboViewModel combo, string selectedItemsInput)
         {
-            if (ModelState.IsValid)
+            try {
+        var selectedMenuItemIds = JsonConvert.DeserializeObject<List<int>>(selectedItemsInput);
+
+        var existingCombo = db.Combos.Include(c => c.ComboItems)
+                                    .FirstOrDefault(c => c.ComboId == combo.ComboId);
+
+        existingCombo.ComboName = combo.ComboName;
+        existingCombo.ComboPrice = combo.ComboPrice;
+
+        // Xóa comboitems cũ
+        db.ComboItems.RemoveRange(existingCombo.ComboItems);
+
+        // Thêm comboitems mới
+        foreach (var menuItemId in selectedMenuItemIds)
+        {
+            db.ComboItems.Add(new ComboItem
             {
-                var selectedMenuItemIds = JsonConvert.DeserializeObject<List<int>>(selectedItemsInput);
+                ComboId = existingCombo.ComboId,
+                MenuItemId = menuItemId,
+            });
+        }
 
-                var existingCombo = db.Combos.Include(c => c.ComboItems).FirstOrDefault(c => c.ComboId == combo.ComboId);
-
-                existingCombo.ComboName = combo.ComboName;
-                existingCombo.ComboPrice = combo.ComboPrice;
-
-                db.ComboItems.RemoveRange(existingCombo.ComboItems);
-                foreach (var menuItemId in selectedMenuItemIds)
-                {
-                    db.ComboItems.Add(new ComboItem
-                    {
-                        ComboId = existingCombo.ComboId,
-                        MenuItemId = menuItemId,
-                    });
-                }
-
-                db.SaveChanges();
-                return RedirectToAction("Combo");
-            }
-
-            return View(combo);
+        db.SaveChanges();
+        return RedirectToAction("Combo");
+    }
+    catch (Exception ex) {
+        return View(combo); 
+    }
+          
         }
 
         // Huy Hoàng

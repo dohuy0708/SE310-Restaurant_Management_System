@@ -120,6 +120,21 @@ namespace SE310_Restaurant_Management_System.Controllers.Cashier
         [ValidateAntiForgeryToken]
         public IActionResult Booking(BookingOrder bookingOrder)
         {
+            if (bookingOrder.DepositAmount == null || bookingOrder.DepositAmount < 100000)
+            {
+                ModelState.AddModelError("DepositAmount", "Tiền cọc phải lớn hơn 100.000 đồng.");
+            }
+
+            if (bookingOrder.DepositAmount % 1000 != 0)
+            {
+                ModelState.AddModelError("DepositAmount", "Tiền cọc phải là bội số của 1.000 đồng.");
+            }
+
+            // Kiểm tra thời gian đặt bàn
+            if (bookingOrder.BookingTime < DateTime.Now.AddHours(1))
+            {
+                ModelState.AddModelError("BookingTime", "Thời gian đặt bàn phải lớn hơn hiện tại ít nhất 1 tiếng.");
+            }
             if (ModelState.IsValid)
             {
                 // Cập nhật trạng thái bàn thành đã được đặt (giả sử là StatusId = 1 cho bàn đã được đặt)

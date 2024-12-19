@@ -19,11 +19,10 @@
             </div>
             <label asp-for="ImagePath">Hình ảnh</label>
             <div class="">
-                <input asp-for="ImagePath" class="file-upload-info" id="customFile" />
+                <input asp-for="ImagePath" class="file-upload-info" id="customFile" onchange="changeImage(event)" />
                 <span asp-validation-for="ImagePath" class="text-danger"></span>
             </div>
 
-            <p class="note">Dung lượng file tối đa 1 MB<br>Định dạng: .JPEG, .PNG<br>Nên sử dụng hình ảnh có tỉ lệ 1:1</p>
         </div>
 
         <div class="right-panel">
@@ -45,7 +44,7 @@
             <div class="form-group">
                 <h3>Danh sách món ăn trong combo</h3>
 
-                <button id="addMenuItemBtn" class="add-item-btn">Thêm món ăn</button>
+                <button id="addMenuItemBtn" class="add-item-btn" onclick="showModal(event)">Thêm món ăn</button>
 
                 <table class="item-table">
                     <thead>
@@ -61,12 +60,9 @@
                     </tbody>
                 </table>
             </div>
-
-
-
             <input type="hidden" id="selectedItemsInput" name="selectedItemsInput" value="" />
-            <button class="save-btn">Lưu lại</button>
-            <button class="back-btn" onclick="history.back()">Quay lại</button>
+            <button class="save-btn" onclick="saveCombo()">Lưu combo</button>
+            <button class="back-btn" onclick="window.location.href='@Url.Action("Combo", "Admin")'">Quay lại</button>
         </div>
     </div>
 
@@ -75,17 +71,51 @@
 
 
 <!-- Modal -->
-<div id="menuItemsPopup" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+<div id="menuItemsPopup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="menuItemsPopupLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chọn món ăn</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <style>
+                .modal-custom {
+                    max-width: 40%;
+                    width: auto;
+                }
+
+                .menu-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
+
+                .menu-list {
+                    flex: 3; /* Phần trái chiếm 1 phần */
+                    margin-right: 20px; /* Khoảng cách giữa hai cột */
+                }
+
+                .order-list {
+                    flex: 2; /* Phần phải chiếm 1 phần */
+                    border-left: 1px solid #ccc; /* Đường viền giữa hai phần */
+                    padding-left: 20px; /* Khoảng cách bên trái của danh sách đã gọi */
+                }
+            </style>
+            <div class="modal-header pb-0" style="align-items: flex-start;">
+                <div>
+                    <h5 class="modal-title mb-3" id="menuItemsPopupLabel">Chọn món ăn</h5>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; font-size: 26px;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <div id="menuItemsContent"></div>
+            <div class="modal-body pt-0" style="max-height:500px; display: flex; overflow-y: auto;">
+                <div class="menu-list" id="menuItemsContent">
+                    <!-- Nội dung món ăn sẽ được tải vào đây -->
+                </div>
+             @*    <div class="order-list">
+                    <h6>Các món đã chọn:</h6>
+                    <ul id="orderedItemsList">
+                        <!-- Các món đã chọn sẽ được thêm vào đây -->
+                    </ul>
+                </div> *@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="saveSelectedMenuItems">Lưu</button>
@@ -95,23 +125,45 @@
     </div>
 </div>
 
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="../../assets/js/file-upload.js"></script>
 <script>
-    $(document).ready(function () {
-        $("#addMenuItemBtn").on("click", function () {
-            $.ajax({
-                url: '/Admin/GetMenuItems',
-                type: 'GET',
-                success: function (data) {
-                    $("#menuItemsContent").html(data); 
-                    $("#menuItemsPopup").modal("show"); 
-                },
-                error: function () {
-                    alert("Không thể tải danh sách món ăn.");
-                }
-            });
+    function showModal(event){
+        event.preventDefault();
+        $.ajax({
+            url: '@Url.Action("GetMenuItems")',
+            type: 'GET',
+            success: function (data) {
+                $("#menuItemsContent").html(data);
+                $("#menuItemsPopup").modal("show");
+            },
+            error: function () {
+                alert("Không thể tải danh sách món ăn.");
+            }
         });
+    }
+    function changeImage(event) { // Lấy file vừa chọn
+        var file = event.target.files[0];
+
+        // Kiểm tra nếu file là một ảnh
+        if (file && file.type.startsWith('image/')) {
+            var reader = new FileReader();
+
+            // Đọc ảnh và hiển thị nó trong thẻ img
+            reader.onload = function (e) {
+                document.getElementById('preview').src = e.target.result;
+            };
+
+            // Đọc file dưới dạng Data URL
+            reader.readAsDataURL(file);
+        } else {
+            alert('Vui lòng chọn một tệp ảnh.');
+        }
+    }
+
+    $(document).ready(function () {
+       
 
         $("#saveSelectedMenuItems").on("click", function () {
             let selectedItems = [];

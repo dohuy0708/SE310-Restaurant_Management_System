@@ -21,7 +21,7 @@
                 </div>
                 <!-- Search input with custom styles -->
                 <input type="text" class="form-control bg-transparent"
-                       placeholder="Tìm kiếm tên nguyên liệu" name="searchTerm"
+                       placeholder="Tìm kiếm tên món ăn" name="searchTerm"
                        value="@ViewBag.SearchTerm"
                        style="border: 1px solid #FF7651; height: 34px; padding: 0 12px; font-size: 1em;">
             </div>
@@ -36,7 +36,7 @@
     </div>
 </div>
     <div class="d-flex align-items-center justify-content-left mb-3" style="position:relative">
-        <label for="typeId" style="margin-right: 10px; font-weight: bold;">Loại nguyên liệu:</label>
+        <label for="typeId" style="margin-right: 10px; font-weight: bold;">Loại món ăn:</label>
         <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             @ViewBag.Name
         </button>
@@ -63,10 +63,10 @@
         <thead>
             <tr>
                 <th style="width: 10%">Hình ảnh</th>
-                <th style="width: 20%">Tên món ăn</th>
-                <th style="width: 20">Loại món ăn</th>
+                <th style="width: 15%">Tên món ăn</th>
+                <th style="width: 15%">Loại món ăn</th>
                 <th style="width: 30%">Mô tả</th>
-                <th style="width: 5%">Giá</th>
+                <th style="width: 15%">Giá</th>
                 <th style="width: 15%"></th>
             </tr>
         </thead>
@@ -90,21 +90,44 @@
                         @Html.DisplayFor(modelItem => item.Description)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Price)
+                        @String.Format("{0:N0} đ", item.Price)
                     </td>
                     <td>
                         <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="edititem" asp-route-id="@item.MenuItemId">Sửa</a>
-                        <a class="btn btn-sm btn-danger" asp-controller="admin" asp-action="deleteitem" asp-route-id="@item.MenuItemId" onclick="return confirm('Bạn có chắc chắn xóa?')">Xóa</a>
-                    </td>
+                        <form id="deleteItemForm-@item.MenuItemId" asp-action="DeleteItem" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken() <!-- Token để bảo vệ khỏi các cuộc tấn công CSRF -->
+                            <input type="hidden" name="id" value="@item.MenuItemId" /> <!-- Truyền id của món ăn cần xóa -->
+                            <button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteItem(@item.MenuItemId)">Xóa</button>
+                        </form>
+
+
+                    </td>   
                 </tr>
             }
         </tbody>
     </table>
 </div>
 
+<script>
+    function confirmDeleteItem(itemId) {
+        // Hiển thị SweetAlert để xác nhận xóa
+        Swal.fire({
+            title: 'Bạn có chắc chắn muốn xóa món ăn này?',
+            text: "Thao tác này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Submit form
+                document.getElementById(`deleteItemForm-${itemId}`).submit();
+            }
+        });
+    }
 
-
-
+</script>
 <div class="page-list" style="position:fixed; top:600px>
     @Html.PagedListPager(Model, page => Url.Action("MenuItem", new { page = page }), new PagedListRenderOptions()
 {
