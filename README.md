@@ -12,3 +12,6 @@ A restaurant management website helps make daily tasks easier and improve custom
 * Do Nguyen Hoang Huy - 22520538 (Leader)
 * Le Huy Hoang - 22520462
 * Vo Tan Hoang - 22520483
+ 
+### Supervisors:
+TS. Nguyen Trinh Dong - Faculty of Software Engineering, University of Information Technology 
