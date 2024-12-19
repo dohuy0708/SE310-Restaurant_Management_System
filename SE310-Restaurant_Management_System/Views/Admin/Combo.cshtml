@@ -55,7 +55,7 @@
                             @item.ComboPrice.ToString("N0") đ
                         </td>
                         <td>
-                            <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="editcombo" asp-route-id="@item.ComboId">Sửa</a>
+                            <a class="btn btn-sm btn-warning" asp-controller="admin" asp-action="editcombo" asp-route-id="@item.ComboId">Sửa</a> 
                             <form id="deleteComboForm-@item.ComboId" asp-action="DeleteCombo" method="post" style="display:inline;">
                                 @Html.AntiForgeryToken() <!-- Token bảo vệ khỏi tấn công CSRF -->
                                 <input type="hidden" name="comboId" value="@item.ComboId" /> <!-- Sử dụng comboId thay vì id -->
