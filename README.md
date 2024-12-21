@@ -15,7 +15,7 @@ A restaurant management website helps make daily tasks easier and improve custom
  
 ### Supervisors:
 TS. Nguyen Trinh Dong - Faculty of Software Engineering, University of Information Technology 
-### Description
-## Video Demo
+## Description
+### Video Demo
 
 Link video: [VideoDemo](https://youtu.be/Oe7UO7YOj8k)
